@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企會財私人財富管理終端｜基礎個人理財單元總目錄（第 1 至 4 課）</title>
+  <style>
+    :root {
+      --bg-dark: #060913;
+      --panel-dark: #0f172a;
+      --card-bg: #ffffff;
+      --soft-bg: #f8fafc;
+      --gold: #d97706;
+      --gold-bright: #fbbf24;
+      --gold-light: #fef3c7;
+      --violet: #6d28d9;
+      --violet-light: #ede9fe;
+      --emerald: #059669;
+      --emerald-light: #d1fae5;
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+      --rose: #e11d48;
+      --rose-light: #ffe4e6;
+      --text: #0f172a;
+      --muted: #64748b;
+      --scale: 1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif; user-select: none; }
+    body {
+      background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 45%, #060913 100%);
+      color: var(--text);
+      padding: 14px;
+      font-size: calc(15.5px * var(--scale));
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+    .app { max-width: 1140px; margin: 0 auto; }
+
+    @keyframes popIn { 0% { transform: scale(0.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .pop { animation: popIn 0.22s ease-out; }
+    .shake { animation: shake 0.3s ease-in-out; }
+
+    /* 頂部私人銀行領航看板 */
+    .hero-bank {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      border-radius: 22px;
+      padding: 20px 26px;
+      color: #fff;
+      margin-bottom: 14px;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.55);
+      border: 1px solid rgba(251, 191, 36, 0.38);
+    }
+    .hb-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+    .hb-brand { display: flex; align-items: center; gap: 14px; }
+    .vip-badge {
+      background: linear-gradient(135deg, #fbbf24, #b45309);
+      color: #0f172a; padding: 10px 15px; border-radius: 14px;
+      font-weight: 900; font-size: calc(12.5px * var(--scale)); letter-spacing: 0.5px;
+      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.4); text-align: center; line-height: 1.25;
+    }
+    .hb-title { font-size: calc(22px * var(--scale)); font-weight: 900; letter-spacing: 0.5px; }
+    .hb-sub { font-size: calc(13px * var(--scale)); color: #fde68a; font-weight: 700; margin-top: 2px; }
+
+    .hb-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pill-stat { background: rgba(6, 9, 19, 0.7); border: 1px solid rgba(251, 191, 36, 0.45); padding: 6px 14px; border-radius: 30px; font-weight: 900; font-size: calc(13.5px * var(--scale)); color: #fde047; }
+    .ctrl-btn { background: var(--gold-bright); color: #0f172a; border: none; padding: 7px 14px; border-radius: 30px; font-weight: 900; font-size: calc(13px * var(--scale)); cursor: pointer; transition: transform 0.15s; }
+    .ctrl-btn:hover { transform: scale(1.05); background: #fcd34d; }
+
+    /* 進度追蹤列 */
+    .prog-bar-wrap { background: rgba(6, 9, 19, 0.55); border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; border: 1px solid rgba(255,255,255,0.14); }
+    .prog-text { font-size: calc(13.5px * var(--scale)); font-weight: 900; color: #fef3c7; white-space: nowrap; }
+    .prog-track { flex: 1; min-width: 180px; height: 12px; background: rgba(255,255,255,0.15); border-radius: 20px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #fbbf24, #10b981); border-radius: 20px; transition: width 0.35s ease; }
+    .prog-reset { background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #cbd5e1; padding: 4px 10px; border-radius: 8px; font-size: calc(12px * var(--scale)); font-weight: 800; cursor: pointer; }
+    .prog-reset:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* 四大主視圖切換導航 */
+    .hub-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 780px) { .hub-nav { grid-template-columns: repeat(2, 1fr); } }
+    .hub-tab {
+      background: #0f172a; border: 2px solid #1e293b; border-radius: 14px; padding: 12px 10px;
+      color: #94a3b8; cursor: pointer; text-align: center; transition: all 0.2s;
+    }
+    .hub-tab:hover { border-color: var(--gold-bright); color: #fff; transform: translateY(-2px); }
+    .hub-tab.active {
+      background: linear-gradient(135deg, #d97706, #9333ea);
+      border-color: #fde68a; color: #fff; box-shadow: 0 6px 18px rgba(217, 119, 6, 0.4);
+    }
+    .hub-icon { font-size: calc(23px * var(--scale)); display: block; margin-bottom: 3px; }
+    .hub-label { font-size: calc(14.5px * var(--scale)); font-weight: 900; display: block; }
+    .hub-sub { font-size: calc(11.5px * var(--scale)); opacity: 0.9; }
+
+    /* 主舞台 */
+    .stage {
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 550px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+      border: 2px solid #cbd5e1;
+    }
+
+    /* ================= 視圖 1：四課財富管理傳送門圖卡 ================= */
+    .portal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    @media (max-width: 820px) { .portal-grid { grid-template-columns: 1fr; } }
+
+    .wealth-card {
+      background: #fff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 22px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: all 0.2s; box-shadow: 0 6px 18px rgba(0,0,0,0.05); position: relative;
+    }
+    .wealth-card:hover { transform: translateY(-4px); border-color: var(--gold); box-shadow: 0 14px 28px rgba(217, 119, 6, 0.16); }
+    .wealth-card.completed { border-color: var(--emerald); background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); }
+
+    .wc-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .wc-badge { padding: 5px 13px; border-radius: 20px; font-weight: 900; font-size: calc(13px * var(--scale)); color: #fff; display: inline-flex; align-items: center; gap: 6px; }
+    .done-btn {
+      padding: 5px 12px; border-radius: 20px; border: 2px solid #cbd5e1; background: #f8fafc;
+      font-size: calc(12px * var(--scale)); font-weight: 900; color: var(--muted); cursor: pointer;
+    }
+    .done-btn.is-done { background: var(--emerald-light); border-color: var(--emerald); color: #064e3b; }
+
+    .wc-title { font-size: calc(20px * var(--scale)); font-weight: 900; color: var(--text); margin-bottom: 6px; }
+    .wc-sub { font-size: calc(14px * var(--scale)); font-weight: 700; color: var(--muted); margin-bottom: 12px; }
+    .wc-formula {
+      background: #f8fafc; border-left: 4px solid var(--gold); padding: 9px 12px;
+      border-radius: 8px; font-size: calc(13px * var(--scale)); font-weight: 900; color: #1e293b; margin-bottom: 12px;
+    }
+    .wc-pills-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .wc-pill { font-size: calc(12px * var(--scale)); font-weight: 800; padding: 4px 10px; border-radius: 6px; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+
+    .wc-actions { display: flex; gap: 10px; align-items: center; }
+    .launch-btn {
+      flex: 1; padding: 12px 16px; border-radius: 12px; border: none;
+      color: #fff; font-size: calc(15px * var(--scale)); font-weight: 900; cursor: pointer;
+      text-align: center; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; gap: 6px;
+      transition: transform 0.15s;
+    }
+    .launch-btn:hover { transform: scale(1.01); opacity: 0.94; }
+    .detail-btn {
+      padding: 12px 14px; border-radius: 12px; border: 2px solid #cbd5e1; background: #fff;
+      font-size: calc(13.5px * var(--scale)); font-weight: 900; color: #1e293b; cursor: pointer;
+    }
+    .detail-btn:hover { background: var(--gold-light); border-color: var(--gold); }
+
+    /* ================= 視圖 2：互動「個人財富生態圈與路線圖」 ================= */
+    .eco-map-box { background: linear-gradient(135deg, #0f172a, #1e1b4b); border-radius: 18px; padding: 20px; color: #fff; margin-bottom: 18px; border: 2px solid var(--gold-bright); }
+    .em-title { font-size: calc(16px * var(--scale)); font-weight: 900; color: var(--gold-bright); margin-bottom: 14px; text-align: center; }
+    .em-nodes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 780px) { .em-nodes { grid-template-columns: repeat(2, 1fr); } }
+    .em-node {
+      background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 14px; padding: 14px 10px; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .em-node:hover { border-color: var(--gold-bright); background: rgba(255,255,255,0.14); transform: translateY(-3px); }
+    .em-node.active { background: linear-gradient(145deg, #d97706, #7c3aed); border-color: #fde68a; box-shadow: 0 0 18px rgba(251, 191, 36, 0.45); }
+    .emn-ch { font-size: calc(12px * var(--scale)); font-weight: 900; color: #fde047; display: block; margin-bottom: 4px; }
+    .emn-icon { font-size: calc(30px * var(--scale)); display: block; margin-bottom: 4px; }
+    .emn-name { font-size: calc(14.5px * var(--scale)); font-weight: 900; }
+
+    .eco-detail-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 22px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: center; }
+    @media (max-width: 780px) { .eco-detail-card { grid-template-columns: 1fr; } }
+    .ed-list { list-style: none; margin: 10px 0; }
+    .ed-list li { padding: 7px 0; font-weight: 800; font-size: calc(14.5px * var(--scale)); border-bottom: 1px dashed #cbd5e1; }
+    .ed-trap { background: #fff1f2; border: 2px solid #fda4af; border-radius: 12px; padding: 14px; color: #881337; font-weight: 800; font-size: calc(14px * var(--scale)); }
+
+    /* ================= 視圖 3：跨課「三合一超級理財速算與速查工作台」 ================= */
+    .tool-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tt-btn { flex: 1; min-width: 200px; padding: 11px 12px; border-radius: 12px; border: 2px solid #cbd5e1; background: #f8fafc; font-weight: 900; font-size: calc(14px * var(--scale)); color: var(--muted); cursor: pointer; }
+    .tt-btn.active { background: #1e1b4b; color: #fff; border-color: #1e1b4b; }
+
+    .calc-workbench { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 780px) { .calc-workbench { grid-template-columns: 1fr; } }
+    .cw-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 16px; padding: 18px; }
+    .cw-title { font-size: calc(16px * var(--scale)); font-weight: 900; color: #1e1b4b; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; }
+
+    .cheat-table { width: 100%; border-collapse: collapse; font-size: calc(13.5px * var(--scale)); font-weight: 800; background: #fff; border-radius: 12px; overflow: hidden; border: 2px solid #cbd5e1; }
+    .cheat-table th { background: #0f172a; color: #fff; padding: 9px 12px; text-align: left; }
+    .cheat-table td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a; }
+
+    /* ================= 視圖 4：跨課綜合「理財策劃師」實戰診斷擂台 ================= */
+    .quiz-banner { background: linear-gradient(135deg, #1e1b4b, #0f172a); color: #fff; border-radius: 16px; padding: 22px; margin-bottom: 16px; border-left: 8px solid var(--gold-bright); }
+    .qb-tag { font-size: calc(12.5px * var(--scale)); color: var(--gold-bright); font-weight: 900; margin-bottom: 6px; display: block; }
+    .qb-stem { font-size: calc(17.5px * var(--scale)); font-weight: 900; line-height: 1.55; }
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 820px) { .steps-grid { grid-template-columns: 1fr; } }
+    .step-col { background: var(--soft-bg); border: 2px solid #cbd5e1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .step-q { font-size: calc(13.5px * var(--scale)); font-weight: 900; color: #1e1b4b; margin-bottom: 10px; min-height: 42px; }
+    .step-opts { display: flex; flex-direction: column; gap: 7px; }
+    .step-btn { width: 100%; padding: 10px 12px; border-radius: 9px; border: 2px solid #cbd5e1; background: #fff; font-weight: 800; font-size: calc(13.5px * var(--scale)); color: var(--text); cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.45; }
+    .step-btn:hover { border-color: var(--violet); background: var(--violet-light); }
+    .step-btn.picked { background: var(--violet-light); border-color: var(--violet); color: #2e1065; box-shadow: inset 0 0 0 1px var(--violet); }
+
+    .dot-btn { width: calc(34px * var(--scale)); height: calc(34px * var(--scale)); border-radius: 10px; border: 2px solid #cbd5e1; background: #fff; font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; color: var(--muted); }
+    .dot-btn.active { background: var(--violet); color: #fff; border-color: var(--violet); }
+    .helper-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--gold); background: var(--gold-light); color: #92400e; font-weight: 900; font-size: calc(12.5px * var(--scale)); cursor: pointer; }
+
+    .feedback-pop { margin-top: 14px; padding: 16px 18px; border-radius: 14px; font-size: calc(14.5px * var(--scale)); font-weight: 700; display: none; line-height: 1.65; }
+    .fb-ok { background: var(--emerald-light); border: 2px solid var(--emerald); color: #064e3b; }
+    .fb-err { background: var(--rose-light); border: 2px solid var(--rose); color: #881337; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- 頂部私人銀行領航看板 -->
+  <header class="hero-bank">
+    <div class="hb-top">
+      <div class="hb-brand">
+        <div class="vip-badge">💼 PRIVATE WEALTH<br>& FINTECH HUB</div>
+        <div>
+          <div class="hb-title">企會財（BAFS）私人財富管理終端｜基礎個人理財總目錄</div>
+          <div class="hb-sub">涵蓋必修部分《基礎個人理財》全套 4 課（金錢的時間值 ➔ 消費者信貸 ➔ 個人理財策劃及投資 ➔ 股票交易及投資）</div>
+        </div>
+      </div>
+      <div class="hb-controls">
+        <div class="pill-stat" id="doneCountBadge">🏆 完成進度：0 / 4 課</div>
+        <button class="ctrl-btn" onclick="toggleZoom()" id="zoomBtn">🔍 投影大字體：關</button>
+      </div>
+    </div>
+    <div class="prog-bar-wrap">
+      <span class="prog-text" id="progPercentText">個人理財單元進度：0%</span>
+      <div class="prog-track"><div class="prog-fill" id="progFillBar" style="width: 0%;"></div></div>
+      <button class="prog-reset" onclick="resetProgress()">🔄 重置進度標記</button>
+    </div>
+  </header>
+
+  <!-- 四大導航模式切換 -->
+  <nav class="hub-nav">
+    <button class="hub-tab active" onclick="switchHubView(0)" id="hTab0">
+      <span class="hub-icon">💳</span>
+      <span class="hub-label">四課理財終端傳送門</span>
+      <span class="hub-sub">一鍵進入第 1 至 4 課</span>
+    </button>
+    <button class="hub-tab" onclick="switchHubView(1)" id="hTab1">
+      <span class="hub-icon">🧭</span>
+      <span class="hub-label">個人財富生態路線圖</span>
+      <span class="hub-sub">串連 4 課重點與考場伏位</span>
+    </button>
+    <button class="hub-tab" onclick="switchHubView(2)" id="hTab2">
+      <span class="hub-icon">🎛️</span>
+      <span class="hub-label">跨課速算與比較工具台</span>
+      <span class="hub-sub">時間值、MPF、信貸與投資表</span>
+    </button>
+    <button class="hub-tab" onclick="switchHubView(3)" id="hTab3">
+      <span class="hub-icon">🎯</span>
+      <span class="hub-label">跨課理財策劃師擂台</span>
+      <span class="hub-sub">全單元融會貫通實戰個案</span>
+    </button>
+  </nav>
+
+  <!-- 主舞台 -->
+  <main class="stage" id="hubStage"></main>
+</div>
+
+<script>
+  // =========================================================================
+  // 🔗 【老師專用設定區】請在此處填入《基礎個人理財》第 1 至 4 課的網址或檔案名稱
+  // =========================================================================
+  const FINANCE_URLS = {
+    1: "pf_lesson1.html", // 第 1 課：金錢的時間值
+    2: "pf_lesson2.html", // 第 2 課：消費者信貸
+    3: "pf_lesson3.html", // 第 3 課：個人理財策劃及投資
+    4: "pf_lesson4.html"  // 第 4 課：股票交易及投資
+  };
+
+  // 設定點擊傳送門時是否在新分頁開啟（true = 新分頁開啟，適合嵌入 Google Sites）
+  const OPEN_IN_NEW_TAB = true;
+
+  // ==================== 四課完整資料庫 ====================
+  const financeLessons = [
+    {
+      ch: 1,
+      icon: "⏳",
+      color: "linear-gradient(135deg, #d97706, #b45309)",
+      badgeBg: "#d97706",
+      title: "第 1 課：金錢的時間值",
+      subtitle: "單息與複息、未來值 (FV) 與現值 (PV)、淨現值 (NPV) 投資決策、名義與實際回報率 (ERR)",
+      formula: "FV = PV × (1 + i)^n ｜ PV = FV ÷ (1 + i)^n ｜ ERR = (1 + i/m)^m - 1",
+      features: ["🎛️ 動態時間線與複息沙盒", "⏳ 複息與貼現時間線", "📊 淨現值 (NPV) 決策儀", "🏦 實際回報率 (ERR) 秒殺器", "🎯 人生財務決策中心"],
+      points: [
+        "今天收到的一元比將來收到的一元更有價值，因為今天的一元可用作投資以賺取利息。",
+        "淨現值（NPV）＝ 未來淨現金流入的現值（含期末殘值貼現）－ 最初支出；單一項目 NPV ≥ 0 應採納，互斥項目選 NPV 最高者。",
+        "當每年複息多於一次（m > 1）時，實際回報率（ERR）必定高於名義回報率；比較不同複息頻率的計劃時應比較 ERR。"
+      ],
+      trap: "考場伏位：① 若複息計算期（如每年一次）比存款期（如半年）長，不會產生任何利息！② 買東西分期付款屬於支出，應選擇「現值最低」的付款計劃！"
+    },
+    {
+      ch: 2,
+      icon: "💳",
+      color: "linear-gradient(135deg, #6d28d9, #4f46e5)",
+      badgeBg: "#6d28d9",
+      title: "第 2 課：消費者信貸",
+      subtitle: "信用卡、銀行透支、信貸限額（循環貸款）、分期付款貸款 ＆ 個人信貸記錄管理",
+      formula: "計息基數：信用卡＆信貸限額按「結欠餘額」｜透支按「透支金額（每日）」｜分期貸款按「貸款額」",
+      features: ["🎛️ 四大信貸計息與最低還款模擬器", "💳 信貸機制與流動支付診斷", "🧭 個人貸款方案配對顧問", "📊 環聯 (TU) 信貸評分中心", "🏆 捉錯與消去雙擂台"],
+      points: [
+        "分辨四大消費者信貸：信用卡、透支及信貸限額（循環貸款）均可在預先批核信用額內隨時借還且設每月最低還款額（還款靈活）；分期付款貸款則設固定還款期數及金額（促使預先擬定還款計劃）。",
+        "區分易辦事（EPS，即時從銀行戶口扣款）与流動支付兩大系統：借記支付系統（如八達通，餘額須為正數即時扣款）vs 信用支付系統（如 Visa payWave，先消費後還款）。",
+        "掌握影響個人信貸記錄的五大因素（還款記錄、信貸帳戶記錄、未償還債務、破產記錄、拖欠債務記錄）及維持良好信貸記錄的兩大好處（較易獲批核、獲較低貸款利率及較高信用額）。"
+      ],
+      trap: "考場伏位：① 信用卡只還最低還款額仍須按「結欠餘額」付高昂利息（絕非免息或按信用額計息）！② 收入不穩定的自由工作者最不適合「分期付款貸款」；③ 良好信貸記錄與開立定期存款條款無關！"
+    },
+    {
+      ch: 3,
+      icon: "🛡️",
+      color: "linear-gradient(135deg, #059669, #0d9488)",
+      badgeBg: "#059669",
+      title: "第 3 課：個人理財策劃及投資",
+      subtitle: "風險與回報取捨、存款／債券／優先股／普通股、生命週期六階段、投資者權責与強積金 (MPF)",
+      formula: "風險回報：儲蓄存款 ＜ 定期存款 ＜ 政府債券 ＜ 公司債券 ＜ 優先股 ＜ 大型普通股 ＜ 小型普通股",
+      features: ["🎛️ 強積金計算機 ＆ 風險回報光譜", "📈 風險分散與金融產品配置", "🌱 生命週期六階段理財策劃", "🛡️ 強積金與投資者權責審核", "🏆 捉錯與消去雙擂台"],
+      points: [
+        "投資不同行業或不相關產品可分散「企業特有風險」，但不能分散「市場風險」；公司清盤時攤分剩餘資產次序為：債券持有人（第一）➔ 優先股股東（第二）➔ 普通股股東（第三）。",
+        "生命週期六階段（不包括無收入的孩童階段）：年青未婚（創造累積財富）、新婚（置業首期／保險）、育有年幼子女（保險／教育）、育有較年長子女（還按揭／大學學費）、退休前（退休儲備為首／減人壽保險）、退休（維持理想生活方式／醫療／遺產策劃）。",
+        "強積金（MPF）供款：月入 ＜ $7,100 僱員免供但僱主須供 5%；$7,100 至 $30,000 雙方各供 5%；＞ $30,000 雙方上限 $1,500。僱員自選安排每年一次轉移「現職僱員部分強制性供款」的累算權益。"
+      ],
+      trap: "考場伏位：① 儲蓄存款並非零風險（有銀行破產風險）；② 股東獲發「股息」而非利息，債券只有發行公司「破產」時持有至到期日回報才變負數；③ 失業超過一年或暫時離港不可提早提取強積金！"
+    },
+    {
+      ch: 4,
+      icon: "📈",
+      color: "linear-gradient(135deg, #2563eb, #0284c7)",
+      badgeBg: "#2563eb",
+      title: "第 4 課：股票交易及投資",
+      subtitle: "影響股價三層因素（宏觀經濟、行業、企業特有）與投機、港交所主板與 GEM、恒生指數 (HSI)",
+      formula: "公司的市價總值 ＝ 每股市場價格 × 已發行股份數目 ｜ 利率與股價呈反向關係",
+      features: ["🎛️ 財經新聞股價因果模擬器", "📰 影響股價三層因素分析", "🏛️ 港交所：主板與 GEM 對決", "📊 恒生指數 (HSI) 深度解讀", "🏆 捉錯與消去雙擂台"],
+      points: [
+        "解釋股價變動的標準因果鏈：因素（宏觀經濟：經濟狀況、利率、政局；行業因素：行業政策與前景；企業特有：公司表現、派息政策）➔ 影響公司盈利能力或前景 ➔ 影響市場對該股票的需求 ➔ 股價上升或下跌。",
+        "主板 vs GEM：主板上市要求較嚴謹（須通過盈利或收入測試）、以較大型穩健公司為目標、上市公司較多、風險較低；GEM 上市要求較寬鬆（無須符合盈利要求）、以中小企為目標、因盈利能力不確定故風險較高。",
+        "恒生指數（HSI）：按主板上市、市值最大及成交最活躍的非外國公司成份股（藍籌股）市值加權計算；設「金融、公用事業、地產、工商業」四個分類指數；具了解整體動向、跨時段／跨市場比較及作為基準評估個別股票三大重要性。"
+      ],
+      trap: "考場伏位：① 銀行提高派息率不會影響「優先股股東」當年的固定股息收入；② 在 GEM 上市的股票及外國公司不能成為恒指成份股；③ 恒指上升只代表成份股市價普遍上升，個別成份股仍可下跌！"
+    }
+  ];
+
+  // ==================== 跨課綜合「理財策劃師」實戰個案庫 ====================
+  let crossCases = [
+    {
+      title: "跨課綜合個案 1：子山結婚置業與新居買家具的全方位理財規劃（串連第 1、2、3 及 4 課）",
+      tag: "公開試跨課整合題型 ｜ 結合時間值貼現、生命週期、投資產品風險與消費者信貸選擇",
+      desc: "子山現年 27 歲，是一名專業會計師。他計劃在 <strong>3 年後（30 歲時）結婚及置業</strong>，預算屆時須支付 <strong>$900,000 作為住宅單位首期</strong>。他打算今天把一筆款項存入銀行定期存款（年利率 <strong>4%</strong>，每年複息）以儲足首期。朋友則建議他改為買入某在 <strong>GEM 上市的小型科技公司普通股</strong>。3 年後，子山成功置業並步入「新婚」階段，正考慮使用「信用卡」還是申請「分期付款貸款」為新居購置價值 $80,000 的家具。",
+      q1: "1️⃣ 【第 1 課知識】若子山選擇年利率 4%（每年複息）的定期存款，他今天須存入多少本金（PV），才可在 3 年後儲足 $900,000 置業首期（計算至整數元）？",
+      opts1: [
+        { text: "$800,097", ok: true },
+        { text: "$792,000", ok: false },
+        { text: "$831,852", ok: false },
+        { text: "$900,000", ok: false }
+      ],
+      q2: "2️⃣ 【第 3 及 4 課知識】為何子山不應採納朋友建議買入「GEM 小型科技公司的普通股」來儲蓄這筆 3 年後必須動用的置業首期？",
+      opts2: [
+        { text: "因為在 GEM 上市的中小企無須通過盈利測試，盈利能力不確定，且小型企業普通股的股價波動極大（風險最高）及不保證派息；若 3 年後遇上股價大跌蒙受資本虧損，子山便無法如期支付置業首期", ok: true },
+        { text: "因為 GEM 股票屬於恒生指數成份股（藍籌股），其預期回報率低於銀行定期存款", ok: false },
+        { text: "因為普通股持有人屬於公司的債權人，必須在十年後才可取回本金", ok: false },
+        { text: "因為香港交易所規定未滿 30 歲的人士不得買賣 GEM 股票", ok: false }
+      ],
+      q3: "3️⃣ 【第 2 及 3 課知識】當子山步入「新婚」階段並為新居購置 $80,000 家具時，若他希望在未來兩年按固定計劃有系統地還清款項並節省利息支出，應選哪種信貸？而新婚階段除置業首期外還有甚麼主要財務需要？",
+      opts3: [
+        { text: "應申請「分期付款貸款」（利率較低且促使借款人預先擬定還款計劃）；而新婚階段的主要財務需要還包括：購買保險、為退休而儲蓄，以及進行投資", ok: true },
+        { text: "應使用「信用卡」並每月只還最低還款額；而新婚階段的主要財務需要是進行遺產策劃", ok: false },
+        { text: "應使用「銀行透支」按日計息；而新婚階段無須購買任何保險或作退休儲蓄", ok: false },
+        { text: "應使用「八達通借記卡」透支 $80,000；而新婚階段的主要財務需要是支付子女大學學費", ok: false }
+      ],
+      exp: "【跨第 1、2、3、4 課整合拆解】<br>1. **第 1 課現值計算**：$PV = \\frac{\\$900,000}{(1 + 4\\%)^3} = \\mathbf{\\$800,097}$（參照公開試題 1.31a）。<br>2. **第 3、4 課投資風險**：3 年後必須付首期，不能承受本金大幅虧損風險；GEM 公司無須通過盈利測試、股價波動大，普通股亦不保證回報（參照公開試題 1.31b 及課本題 4.8）。<br>3. **第 2、3 課信貸與生命週期**：大額家具若分兩年攤還，用**分期付款貸款**利率遠低於信用卡且能促使預先擬定還款計劃；而新婚階段的四大財務需要為**住宅單位首期、購買保險、為退休而儲蓄、投資**（課本第 76 頁圖 3.12 及公開試題 2.30）！"
+    },
+    {
+      title: "跨課綜合個案 2：銀行經理偉樂的強積金供款、短期存款選擇與銀行股投資分析（串連第 1、3 及 4 課）",
+      tag: "跨課計算與概念整合 ｜ 強積金上限計算 ＋ 半年期存款 ERR 秒殺法 ＋ 優先股派息與利率影響",
+      desc: "偉樂現年 45 歲，是一名銀行經理，<strong>月薪為 $50,000</strong>（今年剛為人父，妻子辭職照顧嬰兒）。他手頭有一筆 <strong>$200,000 閒置現金</strong>想存入銀行<strong>為期半年</strong>，銀行提供三個計劃：(甲) 年利率 4%，每季計算複息；(乙) 年利率 4%，每半年計算複息；(丙) 年利率 4.5%，每年計算複息。此外，偉樂持有某上市銀行的<strong>優先股</strong>及某上市地產商的<strong>普通股</strong>。",
+      q1: "1️⃣ 【第 3 課強積金與生命週期】偉樂（月薪 $50,000，剛育有初生嬰兒）現處於哪個人生階段？他每月須向強積金計劃作出的「強制性供款額」是多少？",
+      opts1: [
+        { text: "處於「已婚並育有年幼子女」階段（因妻子辭職且子女出生令家庭財務負擔大增，必須購買保險及預留子女教育開支）；由於月薪 $50,000 超過 $30,000 上限，其每月強制性供款額為 $1,500", ok: true },
+        { text: "處於「已婚並育有較年長子女」階段；其每月強制性供款額為 $2,500（$50,000 × 5%）", ok: false },
+        { text: "處於「新婚」階段；由於他是銀行經理，可獲豁免參加強積金計劃（供款額為 $0）", ok: false },
+        { text: "處於「退休前」階段；其每月強制性供款額為 $5,000", ok: false }
+      ],
+      q2: "2️⃣ 【第 1 課短期存款秒殺法】偉樂把 $200,000 存入銀行「為期半年」，在甲、乙、丙三個儲蓄計劃中，哪個計劃在半年後提供的回報最高？半年後連本帶利可取回多少？",
+      opts2: [
+        { text: "「甲計劃（年利率 4%，每季複息）」最高，半年後可取回 $204,020（丙計劃因每年複息一次，複息計算期長於半年存款期，半年後不會產生任何利息！）", ok: true },
+        { text: "「丙計劃（年利率 4.5%，每年複息）」最高，因為其名義年利率 4.5% 最高，半年後可取回 $204,500", ok: false },
+        { text: "「乙計劃（年利率 4%，每半年複息）」最高，半年後可取回 $208,000", ok: false },
+        { text: "甲計劃與乙計劃在半年後可取回的金額完全相同，同為 $204,000", ok: false }
+      ],
+      q3: "3️⃣ 【第 3 及 4 課股票分析】若市場利率突然大幅下調，且偉樂持有的上市銀行宣布將本年度派息率提高 30%，這兩件事對偉樂有甚麼影響？",
+      opts3: [
+        { text: "利率下調會減低企業借貸及營運成本並刺激置業需求，令他持有的地產商「普通股」股價傾向上升；但上市銀行提高派息率【不會】增加他作為「優先股股東」今年的股息收入（因優先股股息率是固定的）", ok: true },
+        { text: "利率下調會令地產商普通股股價暴跌；而銀行提高派息率會令他今年的優先股股息收入增加 30%", ok: false },
+        { text: "利率下調與提高派息率均屬於企業特有因素，只會令恒生公用事業分類指數下跌", ok: false },
+        { text: "作為優先股股東，偉樂可以在該上市銀行的股東周年大會上投票贊成提高派息率的議案", ok: false }
+      ],
+      exp: "【跨第 1、3、4 課整合拆解】<br>1. **第 3 課（題 3.19）**：剛為人父屬「已婚並育有年幼子女」階段；月薪 $\\$50,000 > \\$30,000$，強制性供款上限為 **$\\$1,500$**。<br>2. **第 1 課（第 20 頁答題錦囊）**：存款期為半年，丙計劃（每年複息一次）不會產生利息；甲計劃（每季複息，每季利率 $1\\%$，半年有 $n=2$ 季）半年後未來值 $= \\$200,000 \\times (1.01)^2 = \\mathbf{\\$204,020}$，高於乙計劃（$\\$204,000$）！<br>3. **第 3、4 課（題 4.9B 及 4.19a）**：利率下降令借貸成本減少、利潤增加，推高普通股股價；但優先股股息率固定（且無投票權），故提高派息率不會增加優先股股東當年的股息收入！"
+    }
+  ];
+
+  // ==================== 狀態管理 ====================
+  let curView = 0; // 0: 四課傳送門, 1: 財富生態路線圖, 2: 跨課速算與比較工具台, 3: 跨課策劃師擂台
+  let selectedEcoCh = 1;
+  let curToolTab = 0;
+  let curCrossIdx = 0;
+  let stepPicks = [null, null, null];
+  let isZoom = false;
+
+  // 工具台速算參數
+  let toolTv = { pv: 50000, rate: 6, yr: 3, m: 2 };
+  let toolMpf = 22000;
+
+  let completedMap = {};
+  try {
+    const saved = localStorage.getItem("bafs_pf_done_v1");
+    if (saved) completedMap = JSON.parse(saved);
+  } catch (e) {}
+
+  function saveProgress() {
+    try {
+      localStorage.setItem("bafs_pf_done_v1", JSON.stringify(completedMap));
+    } catch (e) {}
+    updateProgressBar();
+  }
+
+  function toggleLessonDone(ch, e) {
+    if (e) e.stopPropagation();
+    completedMap[ch] = !completedMap[ch];
+    saveProgress();
+    renderHubStage();
+  }
+
+  function resetProgress() {
+    completedMap = {};
+    saveProgress();
+    renderHubStage();
+  }
+
+  function updateProgressBar() {
+    let cnt = 0;
+    for (let i = 1; i <= 4; i++) {
+      if (completedMap[i]) cnt++;
+    }
+    const pct = Math.round((cnt / 4) * 100);
+    document.getElementById("doneCountBadge").innerText = `🏆 完成進度：${cnt} / 4 課`;
+    document.getElementById("progPercentText").innerText = `個人理財單元進度：${pct}%（已完成 ${cnt} 課）`;
+    document.getElementById("progFillBar").style.width = `${pct}%`;
+  }
+
+  function toggleZoom() {
+    isZoom = !isZoom;
+    document.documentElement.style.setProperty('--scale', isZoom ? '1.16' : '1');
+    document.getElementById("zoomBtn").innerText = isZoom ? "🔍 投影大字體：開" : "🔍 投影大字體：關";
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function fmt(num, dec = 0) {
+    return Number(num).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function switchHubView(v) {
+    curView = v;
+    for (let i = 0; i < 4; i++) {
+      document.getElementById(`hTab${i}`).className = "hub-tab" + (i === v ? " active" : "");
+    }
+    if (v === 3) {
+      crossCases.forEach(c => {
+        c.opts1 = shuffle(c.opts1);
+        c.opts2 = shuffle(c.opts2);
+        c.opts3 = shuffle(c.opts3);
+      });
+      stepPicks = [null, null, null];
+    }
+    renderHubStage();
+  }
+
+  function jumpToEcoMap(ch) {
+    selectedEcoCh = ch;
+    switchHubView(1);
+  }
+
+  function renderHubStage() {
+    const stage = document.getElementById("hubStage");
+    stage.classList.remove("pop");
+    void stage.offsetWidth;
+    stage.classList.add("pop");
+
+    if (curView === 0) renderPortalView(stage);
+    else if (curView === 1) renderEcoMapView(stage);
+    else if (curView === 2) renderToolsView(stage);
+    else if (curView === 3) renderCrossQuizView(stage);
+  }
+
+  // ==================== 渲染視圖 1：四課財富管理傳送門 ====================
+  function renderPortalView(stage) {
+    const cardsHtml = financeLessons.map(item => {
+      const isDone = !!completedMap[item.ch];
+      const url = FINANCE_URLS[item.ch] || "#";
+      const targetAttr = OPEN_IN_NEW_TAB ? 'target="_blank" rel="noopener"' : '';
+      const pills = item.features.map(f => `<span class="wc-pill">${f}</span>`).join("");
+
+      return `
+        <div class="wealth-card ${isDone ? 'completed' : ''}">
+          <div>
+            <div class="wc-top">
+              <span class="wc-badge" style="background:${item.badgeBg};">${item.icon} 第 ${item.ch} 課</span>
+              <button class="done-btn ${isDone ? 'is-done' : ''}" onclick="toggleLessonDone(${item.ch}, event)">
+                ${isDone ? '✅ 已完成溫習' : '⬜ 標記完成'}
+              </button>
+            </div>
+            <div class="wc-title">${item.title}</div>
+            <div class="wc-sub">${item.subtitle}</div>
+            <div class="wc-formula">📌 ${item.formula}</div>
+            <div style="font-size:calc(12px * var(--scale)); font-weight:900; color:#64748b; margin-bottom:6px;">🛠️ 內置專屬模擬器與實戰工作區：</div>
+            <div class="wc-pills-wrap">${pills}</div>
+          </div>
+          <div class="wc-actions">
+            <a class="launch-btn" style="background:${item.color};" href="${url}" ${targetAttr}>
+              🚀 進入第 ${item.ch} 課理財終端 →
+            </a>
+            <button class="detail-btn" onclick="jumpToEcoMap(${item.ch})">🔍 重點與伏位</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    stage.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:18px; padding-bottom:12px; border-bottom:2px solid #e2e8f0;">
+        <div style="font-weight:900; color:#1e1b4b; font-size:calc(17px * var(--scale));">
+          💳 請選擇你要進入的《基礎個人理財》互動終端機：
+        </div>
+        <span style="font-size:calc(13px * var(--scale)); font-weight:800; color:var(--muted);">💡 提示：每課均內置獨立的頂部動態財務模擬沙盒與無規律洗牌題庫</span>
+      </div>
+      <div class="portal-grid">${cardsHtml}</div>
+    `;
+  }
+
+  // ==================== 渲染視圖 2：個人財富生態路線圖 ====================
+  function renderEcoMapView(stage) {
+    const nodesHtml = financeLessons.map(item => `
+      <div class="em-node ${selectedEcoCh === item.ch ? 'active' : ''}" onclick="selectEcoNode(${item.ch})">
+        <span class="emn-ch">第 ${item.ch} 課</span>
+        <span class="emn-icon">${item.icon}</span>
+        <div class="emn-name">${item.title.split("：")[1]}</div>
+      </div>
+    `).join("");
+
+    const curItem = financeLessons.find(d => d.ch === selectedEcoCh);
+    const url = FINANCE_URLS[curItem.ch] || "#";
+    const targetAttr = OPEN_IN_NEW_TAB ? 'target="_blank" rel="noopener"' : '';
+    const pointsHtml = curItem.points.map(p => `<li>✔️ ${p}</li>`).join("");
+
+    stage.innerHTML = `
+      <div class="eco-map-box">
+        <div class="em-title">🧭 點擊下方四課樞紐節點，檢視各課在「個人財富管理生態圈」中的核心重點與考場伏位：</div>
+        <div class="em-nodes">${nodesHtml}</div>
+      </div>
+
+      <div class="eco-detail-card">
+        <div>
+          <span class="wc-badge" style="background:${curItem.badgeBg}; margin-bottom:8px;">${curItem.icon} 第 ${curItem.ch} 課核心檔案</span>
+          <h3 style="font-size:calc(21px * var(--scale)); font-weight:900; margin-bottom:6px;">${curItem.title}</h3>
+          <div class="wc-formula" style="margin-bottom:10px;">📌 ${curItem.formula}</div>
+          <div style="font-weight:900; color:#1e1b4b; font-size:calc(14.5px * var(--scale));">🎯 本課三大必考重點：</div>
+          <ul class="ed-list">${pointsHtml}</ul>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="ed-trap">
+            <div style="font-size:calc(15px * var(--scale)); font-weight:900; margin-bottom:4px;">⚠️ 公開試高頻失分陷阱：</div>
+            <div>${curItem.trap}</div>
+          </div>
+          <a class="launch-btn" style="background:${curItem.color}; padding:15px;" href="${url}" ${targetAttr}>
+            🚀 立即進入「${curItem.title}」互動終端 →
+          </a>
+          <button class="detail-btn" onclick="switchHubView(0)">← 返回四課總目錄列表</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function selectEcoNode(ch) {
+    selectedEcoCh = ch;
+    renderEcoMapView(document.getElementById("hubStage"));
+  }
+
+  // ==================== 渲染視圖 3：跨課「三合一超級理財速算與速查工作台」 ====================
+  function renderToolsView(stage) {
+    let bodyHtml = "";
+    if (curToolTab === 0) {
+      const n = toolTv.yr * toolTv.m;
+      const pRate = (toolTv.rate / 100) / toolTv.m;
+      const fv = toolTv.pv * Math.pow(1 + pRate, n);
+      const pvFromFv = toolTv.pv / Math.pow(1 + pRate, n);
+      const err = (Math.pow(1 + pRate, toolTv.m) - 1) * 100;
+
+      let empMpf = 0, bossMpf = 0;
+      if (toolMpf < 7100) { empMpf = 0; bossMpf = toolMpf * 0.05; }
+      else if (toolMpf <= 30000) { empMpf = toolMpf * 0.05; bossMpf = toolMpf * 0.05; }
+      else { empMpf = 1500; bossMpf = 1500; }
+
+      bodyHtml = `
+        <div class="calc-workbench">
+          <div class="cw-card">
+            <div class="cw-title">⏳ 第 1 課：未來值 (FV)、現值 (PV) 與實際回報率 (ERR) 速算器</div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; font-weight:800;"><span>金額 (PV 或 FV)：</span><strong style="color:var(--gold);">$${fmt(toolTv.pv)}</strong></div>
+              <input type="range" min="5000" max="200000" step="5000" value="${toolTv.pv}" oninput="updateToolTv('pv', this.value)" style="width:100%; accent-color:var(--gold);">
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; font-weight:800;"><span>名義年利率 (i)：</span><strong style="color:var(--gold);">${toolTv.rate}%</strong></div>
+              <input type="range" min="2" max="15" step="1" value="${toolTv.rate}" oninput="updateToolTv('rate', this.value)" style="width:100%; accent-color:var(--gold);">
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+              <div style="flex:1;">
+                <span style="font-weight:800; font-size:calc(13px * var(--scale));">年期：${toolTv.yr} 年</span>
+                <input type="range" min="1" max="5" step="1" value="${toolTv.yr}" oninput="updateToolTv('yr', this.value)" style="width:100%; accent-color:var(--gold);">
+              </div>
+              <div style="flex:1;">
+                <span style="font-weight:800; font-size:calc(13px * var(--scale));">每年複息次數 (m)：${toolTv.m} 次</span>
+                <input type="range" min="1" max="4" step="1" value="${toolTv.m}" oninput="updateToolTv('m', this.value == 3 ? 4 : this.value)" style="width:100%; accent-color:var(--gold);">
+              </div>
+            </div>
+            <div style="background:#0f172a; color:#fff; padding:12px; border-radius:12px; font-weight:800; font-size:calc(13.5px * var(--scale));">
+              • 總時段 $n = ${n}$ 期 ｜ 每期利率 $= ${(pRate * 100).toFixed(2)}\\%$<br>
+              • 複息未來值 $FV = \\mathbf{\\$${fmt(fv, 1)}}$ ｜ 貼現現值 $PV = \\mathbf{\\$${fmt(pvFromFv, 1)}}$<br>
+              • 每年實際回報率 $ERR = \\mathbf{${err.toFixed(2)}\\%}$
+            </div>
+          </div>
+
+          <div class="cw-card">
+            <div class="cw-title">🛡️ 第 3 課：強積金（MPF）勞資雙方每月強制性供款速算器</div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-weight:800;"><span>僱員每月有關入息：</span><strong style="color:var(--emerald); font-size:calc(18px * var(--scale));">$${fmt(toolMpf)}</strong></div>
+              <input type="range" min="3000" max="45000" step="500" value="${toolMpf}" oninput="updateToolMpf(this.value)" style="width:100%; accent-color:var(--emerald);">
+              <div style="display:flex; justify-content:space-between; font-size:calc(11.5px * var(--scale)); color:var(--muted); font-weight:800;">
+                <span>$3,000</span><span>最低水平 $7,100</span><span>最高水平 $30,000</span><span>$45,000</span>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+              <div style="background:#ecfdf5; border:2px solid var(--emerald); padding:10px; border-radius:10px; text-align:center;">
+                <div style="font-size:calc(12px * var(--scale)); font-weight:800; color:#065f46;">👤 僱員強制性供款</div>
+                <div style="font-size:calc(20px * var(--scale)); font-weight:900; color:#047857;">$${fmt(empMpf)}</div>
+              </div>
+              <div style="background:#eff6ff; border:2px solid var(--blue); padding:10px; border-radius:10px; text-align:center;">
+                <div style="font-size:calc(12px * var(--scale)); font-weight:800; color:#1e40af;">🏢 僱主強制性供款</div>
+                <div style="font-size:calc(20px * var(--scale)); font-weight:900; color:#1d4ed8;">$${fmt(bossMpf)}</div>
+              </div>
+            </div>
+            <div style="font-size:calc(13px * var(--scale)); font-weight:800; color:#334155;">
+              💡 <strong>強積金供款黃金口訣</strong>：低於 $7,100「僱員免供、僱主照供 5%」；$7,100 至 $30,000「雙方各供 5%」；高於 $30,000「雙方封頂各供 $1,500」！
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (curToolTab === 1) {
+      bodyHtml = `
+        <div style="overflow-x:auto;">
+          <table class="cheat-table">
+            <thead>
+              <tr>
+                <th>比較維度（第 2 課核心）</th>
+                <th>信用卡 (Credit Card)</th>
+                <th>銀行透支 (Overdraft)</th>
+                <th>信貸限額（循環貸款）</th>
+                <th>分期付款貸款 (Instalment Loan)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>貸款性質與還款安排</strong></td>
+                <td>預先批核信用額內隨時消費；<strong>靈活還款</strong>（不設全數還款限期）</td>
+                <td>配合往來帳戶提取超額款項；<strong>靈活還款</strong>（避免支票遭拒付）</td>
+                <td>預先批核信用額內隨時借還（還款後信用額自動回復）；<strong>靈活還款</strong></td>
+                <td>設有<strong>固定還款次數與固定還款安排</strong>（欠缺靈活性，不適合收入不穩者）</td>
+              </tr>
+              <tr>
+                <td><strong>按哪個金額計算利息？</strong></td>
+                <td>按到期還款日後未清償的<strong>「結欠餘額」</strong></td>
+                <td>按<strong>「透支金額（提款減存款）」每日計息</strong></td>
+                <td>按已提取的<strong>「貸款額（即結欠餘額）」</strong></td>
+                <td>按批出的<strong>「貸款額」</strong></td>
+              </tr>
+              <tr>
+                <td><strong>借款後即時計算利息？</strong></td>
+                <td><strong>不是</strong>（到期日前全數清還免息）</td>
+                <td><strong>是</strong>（按日計息）</td>
+                <td><strong>是</strong>（提款時起計）</td>
+                <td><strong>是</strong></td>
+              </tr>
+              <tr>
+                <td><strong>設有每月最低還款額？</strong></td>
+                <td><strong>是</strong></td>
+                <td><strong>通常是</strong></td>
+                <td><strong>是</strong></td>
+                <td><strong>不是</strong>（須按每期固定金額還本息）</td>
+              </tr>
+              <tr>
+                <td><strong>一般利率水平與主要用途</strong></td>
+                <td><strong>最高</strong>（適合日常方便購物及享優惠）</td>
+                <td><strong>一般較高</strong>（短期應急及防支票拒付）</td>
+                <td><strong>一般較低</strong>（適合需還款彈性但不想付高息者）</td>
+                <td><strong>一般最低</strong>（適合買車等昂貴物品，促使預先擬定還款計劃）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    } else {
+      bodyHtml = `
+        <div style="overflow-x:auto;">
+          <table class="cheat-table">
+            <thead>
+              <tr>
+                <th>金融產品／平台（第 3 及 4 課）</th>
+                <th>持有人身份與投票權</th>
+                <th>回報來源與保證與否</th>
+                <th>風險回報取捨 ／ 清盤攤分資產次序</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. 儲蓄存款 ＆ 定期存款</strong></td>
+                <td>銀行存戶（沒有投票權）</td>
+                <td>保證提供<strong>利息</strong>（定存利率高於儲蓄存款，但到期前不能提取）</td>
+                <td><strong>最低</strong>（惟非零風險，若銀行破產仍可能受損，受存款保障計劃保障）</td>
+              </tr>
+              <tr>
+                <td><strong>2. 政府債券 ＆ 公司債券</strong></td>
+                <td><strong>債權人</strong>（沒有投票權）</td>
+                <td><strong>固定票面利息</strong>（持有至到期日且無破產保證獲發）＋ 資本利潤</td>
+                <td><strong>中等</strong>（公司債券風險 ＞ 政府債券如 iBond）；公司清盤時攤分資產排<strong>第一（最優先）</strong></td>
+              </tr>
+              <tr>
+                <td><strong>3. 優先股 (Preference Share)</strong></td>
+                <td><strong>股東／東主</strong>（沒有周年大會投票權）</td>
+                <td><strong>固定股息（保證獲發股息）</strong> ＋ 資本利潤（注意：公司提高普通股派息率不影響優先股固定股息）</td>
+                <td><strong>中高</strong>（高於債券、低於普通股）；公司清盤時攤分資產排<strong>第二</strong></td>
+              </tr>
+              <tr>
+                <td><strong>4. 普通股 (Ordinary Share)</strong></td>
+                <td><strong>股東／東主（有周年大會投票權）</strong></td>
+                <td><strong>不固定股息（即使有盈利亦不一定獲發）</strong> ＋ 資本利潤（股價升幅潛力最高）</td>
+                <td><strong>最高</strong>（小型企業普通股 ＞ 大型企業普通股）；公司清盤時攤分資產排<strong>第三（最後）</strong></td>
+              </tr>
+              <tr>
+                <td><strong>5. 港交所：主板 vs GEM ＆ 恒指</strong></td>
+                <td colspan="3">
+                  • <strong>主板</strong>：目標為較大型穩健公司，上市要求較嚴謹（須通過盈利或收入測試），風險較低；<strong>恒指成份股（藍籌股）必須在主板上市</strong>（且為非外國公司，分屬<strong>金融、公用事業、地產、工商業</strong>四大分類指數）。<br>
+                  • <strong>GEM</strong>：目標為中小型企業，上市要求較寬鬆（無須符合盈利要求），因盈利能力不確定故風險較高（<strong>GEM 股票不能成為恒指成份股</strong>）。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    stage.innerHTML = `
+      <div>
+        <div class="tool-tabs">
+          <button class="tt-btn ${curToolTab === 0 ? 'active' : ''}" onclick="setToolTab(0)">🖩 1. 時間值 (FV/PV/ERR) 與強積金 (MPF) 雙速算機</button>
+          <button class="tt-btn ${curToolTab === 1 ? 'active' : ''}" onclick="setToolTab(1)">💳 2. 四大消費者信貸全景對比表（第 2 課）</button>
+          <button class="tt-btn ${curToolTab === 2 ? 'active' : ''}" onclick="setToolTab(2)">📈 3. 金融產品光譜、主板 vs GEM 與恒指速查（第 3–4 課）</button>
+        </div>
+        ${bodyHtml}
+      </div>
+    `;
+  }
+
+  function setToolTab(t) {
+    curToolTab = t;
+    renderToolsView(document.getElementById("hubStage"));
+  }
+
+  function updateToolTv(k, v) {
+    toolTv[k] = Number(v);
+    renderToolsView(document.getElementById("hubStage"));
+  }
+
+  function updateToolMpf(v) {
+    toolMpf = Number(v);
+    renderToolsView(document.getElementById("hubStage"));
+  }
+
+  // ==================== 渲染視圖 4：跨課綜合「理財策劃師」實戰擂台 ====================
+  function renderCrossQuizView(stage) {
+    const item = crossCases[curCrossIdx];
+
+    let dotsHtml = "";
+    for (let i = 0; i < crossCases.length; i++) {
+      dotsHtml += `<button class="dot-btn ${i === curCrossIdx ? 'active' : ''}" onclick="goCrossCase(${i})">${i + 1}</button>`;
+    }
+
+    const buildStepCol = (qTitle, optsArr, sIdx) => {
+      const btns = optsArr.map((o, oIdx) => `
+        <button class="step-btn ${stepPicks[sIdx] === oIdx ? 'picked' : ''}" onclick="pickCrossStep(${sIdx}, ${oIdx})">👉 ${o.text}</button>
+      `).join("");
+      return `
+        <div class="step-col">
+          <div class="step-q">${qTitle}</div>
+          <div class="step-opts">${btns}</div>
+        </div>
+      `;
+    };
+
+    stage.innerHTML = `
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid #e2e8f0;">
+          <div style="font-size:calc(18px * var(--scale)); font-weight:900; color:#1e1b4b;">🎯 ${item.title}</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="helper-btn" onclick="autoSolveCross()">💡 示範三步滿分方案</button>
+            ${dotsHtml}
+          </div>
+        </div>
+
+        <div class="quiz-banner">
+          <span class="qb-tag">📌 ${item.tag}</span>
+          <div class="qb-stem">${item.desc}</div>
+        </div>
+
+        <div class="steps-grid">
+          ${buildStepCol(item.q1, item.opts1, 0)}
+          ${buildStepCol(item.q2, item.opts2, 1)}
+          ${buildStepCol(item.q3, item.opts3, 2)}
+        </div>
+
+        <div class="feedback-pop" id="crossFb"></div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:18px; padding-top:12px; border-top:2px solid #e2e8f0;">
+          <button class="detail-btn" onclick="goCrossCase(${Math.max(0, curCrossIdx - 1)})" ${curCrossIdx === 0 ? 'style="visibility:hidden"' : ''}>← 上一綜合個案</button>
+          <button class="launch-btn" style="flex:0; padding:10px 22px; background:linear-gradient(135deg,#d97706,#7c3aed);" onclick="goCrossCase(${(curCrossIdx + 1) % crossCases.length})">下一綜合個案 →</button>
+        </div>
+      </div>
+    `;
+
+    if (stepPicks[0] !== null && stepPicks[1] !== null && stepPicks[2] !== null) {
+      const fb = document.getElementById("crossFb");
+      fb.style.display = "block";
+      const ok0 = item.opts1[stepPicks[0]].ok;
+      const ok1 = item.opts2[stepPicks[1]].ok;
+      const ok2 = item.opts3[stepPicks[2]].ok;
+
+      if (ok0 && ok1 && ok2) {
+        fb.className = "feedback-pop fb-ok";
+        fb.innerHTML = `🏆 <strong>跨課三步分析全數精準命中！你已完全融會貫通《基礎個人理財》全單元知識！</strong><br>${item.exp}`;
+      } else {
+        const st = document.getElementById("hubStage");
+        st.classList.remove("shake");
+        void st.offsetWidth;
+        st.classList.add("shake");
+        fb.className = "feedback-pop fb-err";
+        fb.innerHTML = `⚠️ <strong>部分步驟分析有誤：</strong> 第 1 步 [${ok0 ? '✓' : '✗'}] ｜ 第 2 步 [${ok1 ? '✓' : '✗'}] ｜ 第 3 步 [${ok2 ? '✓' : '✗'}]<br>${item.exp}`;
+      }
+    }
+  }
+
+  function goCrossCase(idx) {
+    curCrossIdx = idx;
+    stepPicks = [null, null, null];
+    renderCrossQuizView(document.getElementById("hubStage"));
+  }
+
+  function pickCrossStep(sIdx, oIdx) {
+    stepPicks[sIdx] = oIdx;
+    renderCrossQuizView(document.getElementById("hubStage"));
+  }
+
+  function autoSolveCross() {
+    const item = crossCases[curCrossIdx];
+    stepPicks[0] = item.opts1.findIndex(o => o.ok);
+    stepPicks[1] = item.opts2.findIndex(o => o.ok);
+    stepPicks[2] = item.opts3.findIndex(o => o.ok);
+    renderCrossQuizView(document.getElementById("hubStage"));
+  }
+
+  // 啟動總目錄頁
+  updateProgressBar();
+  renderHubStage();
+</script>
+</body>
+</html>

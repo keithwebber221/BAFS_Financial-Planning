@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企會財證券交易看盤終端｜第 4 課：股票交易及投資</title>
+  <style>
+    :root {
+      --bg-dark: #050811;
+      --panel-dark: #0f172a;
+      --card-bg: #ffffff;
+      --soft-bg: #f8fafc;
+      --up-green: #10b981;
+      --up-bg: #d1fae5;
+      --down-red: #f43f5e;
+      --down-bg: #ffe4e6;
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+      --text: #0f172a;
+      --muted: #64748b;
+      --scale: 1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif; user-select: none; }
+    body {
+      background: radial-gradient(circle at top, #1e293b, #050811 75%);
+      color: var(--text);
+      padding: 12px;
+      font-size: calc(15.5px * var(--scale));
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .fade-in { animation: fadeSlide 0.25s ease-out; }
+    .shake { animation: shake 0.3s ease-in-out; }
+
+    .app-wrap { max-width: 1140px; margin: 0 auto; }
+
+    /* 頂部：港交所（HKEX）即時看盤報價機 Header */
+    .ticker-header {
+      background: linear-gradient(135deg, #090d16 0%, #1e293b 60%, #0f172a 100%);
+      border-radius: 20px;
+      padding: 16px 22px;
+      color: #fff;
+      margin-bottom: 14px;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.6);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .th-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+    .th-brand { display: flex; align-items: center; gap: 12px; }
+    .hkex-logo {
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: #fff; padding: 8px 14px; border-radius: 12px; font-weight: 900;
+      font-size: calc(13px * var(--scale)); letter-spacing: 0.5px; text-align: center; line-height: 1.2;
+    }
+    .th-title { font-size: calc(20px * var(--scale)); font-weight: 900; }
+    .th-sub { font-size: calc(12.5px * var(--scale)); color: #94a3b8; font-weight: 700; }
+
+    /* 雙軌難度切換器與頂部控制列 */
+    .th-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .diff-switcher {
+      display: inline-flex;
+      background: rgba(5, 8, 17, 0.85);
+      border: 2px solid rgba(251, 191, 36, 0.65);
+      border-radius: 30px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .diff-btn {
+      border: none;
+      padding: 5px 12px;
+      border-radius: 24px;
+      font-weight: 900;
+      font-size: calc(12.5px * var(--scale));
+      cursor: pointer;
+      background: transparent;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+    .diff-btn.active-basic {
+      background: #10b981;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+    }
+    .diff-btn.active-challenge {
+      background: #f59e0b;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
+    }
+
+    .stat-pill { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 30px; font-weight: 900; font-size: calc(13px * var(--scale)); color: #38bdf8; }
+    .ctrl-btn { background: #fbbf24; color: #0f172a; border: none; padding: 7px 13px; border-radius: 30px; font-weight: 900; font-size: calc(12.5px * var(--scale)); cursor: pointer; transition: transform 0.15s; }
+    .ctrl-btn:hover { transform: scale(1.05); background: #fcd34d; }
+
+    /* 即時模擬報價走馬燈列 */
+    .live-ticker-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+    @media (max-width: 780px) { .live-ticker-strip { grid-template-columns: repeat(2, 1fr); } }
+    .ticker-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+    .tb-name { font-size: calc(12.5px * var(--scale)); font-weight: 800; color: #cbd5e1; }
+    .tb-val { font-size: calc(14px * var(--scale)); font-weight: 900; }
+    .val-up { color: #34d399; }
+    .val-down { color: #fb7185; }
+
+    /* 頂部常駐雙引擎沙盒：財經新聞股價因果模擬器 ＆ 恒指藍籌股篩選器 */
+    .terminal-sandbox {
+      background: linear-gradient(135deg, #0f172a, #1e1b4b);
+      color: #fff;
+      border-radius: 18px;
+      padding: 16px 22px;
+      margin-bottom: 14px;
+      border: 2px solid #38bdf8;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .ts-top { display: flex; justify-content: space-between; align-items: center; cursor: pointer; flex-wrap: wrap; gap: 10px; }
+    .ts-title { font-size: calc(15.5px * var(--scale)); font-weight: 900; color: #7dd3fc; display: flex; align-items: center; gap: 8px; }
+    .ts-toggle { background: rgba(56, 189, 248, 0.2); color: #bae6fd; border: 1px solid #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: calc(12.5px * var(--scale)); font-weight: 900; cursor: pointer; }
+
+    .ts-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); }
+    .ts-mode-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tsm-btn { flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #cbd5e1; font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; }
+    .tsm-btn.active { background: #2563eb; color: #fff; border-color: #93c5fd; }
+
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    @media (max-width: 780px) { .news-grid { grid-template-columns: repeat(2, 1fr); } }
+    .news-btn {
+      padding: 9px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.06); color: #f1f5f9; font-weight: 800; font-size: calc(13px * var(--scale));
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .news-btn:hover { border-color: #fbbf24; }
+    .news-btn.active { background: #fbbf24; color: #0f172a; border-color: #fde047; font-weight: 900; }
+
+    .chain-display {
+      background: rgba(9, 13, 22, 0.85); border: 1px solid #fbbf24; border-radius: 12px; padding: 14px 16px;
+      font-size: calc(13.5px * var(--scale)); font-weight: 700; line-height: 1.55;
+    }
+
+    /* 四大實戰工作區導航 */
+    .zone-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 780px) { .zone-nav { grid-template-columns: repeat(2, 1fr); } }
+    .z-tab {
+      background: #0f172a; border: 2px solid #1e293b; border-radius: 14px; padding: 12px 10px;
+      color: #94a3b8; cursor: pointer; text-align: center; transition: all 0.2s;
+    }
+    .z-tab:hover { border-color: #38bdf8; color: #fff; transform: translateY(-2px); }
+    .z-tab.active {
+      background: linear-gradient(135deg, #2563eb, #0284c7);
+      border-color: #7dd3fc; color: #fff; box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    }
+    .zt-icon { font-size: calc(23px * var(--scale)); display: block; margin-bottom: 3px; }
+    .zt-title { font-size: calc(14.5px * var(--scale)); font-weight: 900; display: block; }
+    .zt-sub { font-size: calc(11.5px * var(--scale)); opacity: 0.9; }
+
+    /* 主舞台 */
+    .main-stage {
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 540px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid #cbd5e1;
+    }
+
+    .stage-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+    .sh-title { font-size: calc(18px * var(--scale)); font-weight: 900; color: #1e3a8a; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .mode-pill-indicator { font-size: calc(12px * var(--scale)); padding: 3px 10px; border-radius: 20px; font-weight: 900; }
+    .mp-basic { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+    .mp-challenge { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+
+    .dots-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .dot-btn {
+      width: calc(34px * var(--scale)); height: calc(34px * var(--scale));
+      border-radius: 10px; border: 2px solid #cbd5e1; background: #fff;
+      font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; color: var(--muted);
+    }
+    .dot-btn.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .dot-btn.done { background: var(--up-bg); color: #065f46; border-color: var(--up-green); }
+
+    /* 啟發式導學引導卡（只在基礎導學模式顯示） */
+    .scaffold-banner {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid #34d399;
+      border-left: 7px solid var(--up-green);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      color: #064e3b;
+      font-size: calc(14px * var(--scale));
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .scaffold-tag {
+      display: inline-block;
+      background: var(--up-green);
+      color: #fff;
+      font-size: calc(11.5px * var(--scale));
+      font-weight: 900;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-right: 6px;
+      margin-bottom: 3px;
+    }
+
+    /* 案例情境卡片與資料表 */
+    .case-card {
+      background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      border: 2px solid #93c5fd;
+      border-left: 7px solid var(--blue);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .cc-tag { font-size: calc(12px * var(--scale)); font-weight: 900; color: #1d4ed8; margin-bottom: 4px; display: block; }
+    .cc-desc { font-size: calc(15.5px * var(--scale)); font-weight: 900; color: #1e3a8a; line-height: 1.55; }
+
+    .mini-table-wrap { overflow-x: auto; margin-bottom: 16px; }
+    .info-table { width: 100%; border-collapse: collapse; font-size: calc(13.5px * var(--scale)); font-weight: 800; background: #fff; border-radius: 12px; overflow: hidden; border: 2px solid #cbd5e1; }
+    .info-table th { background: #0f172a; color: #fff; padding: 8px 12px; text-align: left; }
+    .info-table td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a; }
+
+    /* 三步對稱決策卡 */
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 820px) { .steps-grid { grid-template-columns: 1fr; } }
+    .step-col {
+      background: var(--soft-bg); border: 2px solid #cbd5e1; border-radius: 14px; padding: 14px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .step-q { font-size: calc(13.5px * var(--scale)); font-weight: 900; color: #1e3a8a; margin-bottom: 10px; min-height: 42px; }
+    .step-opts { display: flex; flex-direction: column; gap: 7px; }
+    .step-btn {
+      width: 100%; padding: 10px 12px; border-radius: 9px; border: 2px solid #cbd5e1;
+      background: #fff; font-weight: 800; font-size: calc(13.5px * var(--scale)); color: var(--text);
+      cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.45;
+    }
+    .step-btn:hover { border-color: var(--blue); background: #eff6ff; }
+    .step-btn.picked { background: var(--blue-light); border-color: var(--blue); color: #1e3a8a; box-shadow: inset 0 0 0 1px var(--blue); }
+    .step-btn.picked-ok { background: var(--up-bg); border-color: var(--up-green); color: #064e3b; }
+    .step-btn.picked-err { background: var(--down-bg); border-color: var(--down-red); color: #881337; }
+
+    /* 模組 4：紅筆捉錯 ＆ 選擇題消去雙擂台 */
+    .sub-mode-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .sub-mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #cbd5e1; background: #f8fafc; font-weight: 900; font-size: calc(14px * var(--scale)); cursor: pointer; color: var(--muted); }
+    .sub-mode-btn.active { background: #1e3a8a; color: #fff; border-color: #1e3a8a; }
+    .paper-sheet { background: #fefce8; border: 2px solid #fde047; border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+    .sentence-chips-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .sentence-chip { padding: 14px 16px; border-radius: 12px; border: 2px solid #cbd5e1; background: #fff; font-size: calc(15px * var(--scale)); font-weight: 800; color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; line-height: 1.5; }
+    .sentence-chip:hover { border-color: var(--down-red); background: #fff1f2; }
+    .sentence-chip.flaw-found { border-color: var(--down-red); background: #ffe4e6; color: #9f1239; text-decoration: line-through; }
+    .sentence-chip.good-clicked { border-color: var(--up-green); background: #dcfce7; color: #14532d; }
+
+    .elim-stmt-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; flex-wrap: wrap; }
+    .elim-stmt-text { font-size: calc(15px * var(--scale)); font-weight: 800; flex: 1; min-width: 240px; }
+    .elim-stmt-hint { display: block; font-size: calc(12.5px * var(--scale)); color: #047857; font-weight: 800; margin-top: 4px; }
+    .elim-toggles { display: flex; gap: 6px; }
+    .elim-btn { padding: 6px 12px; border-radius: 8px; border: 2px solid #cbd5e1; background: #fff; font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; }
+    .elim-btn.t-true { background: var(--up-green); color: #fff; border-color: var(--up-green); }
+    .elim-btn.t-false { background: var(--down-red); color: #fff; border-color: var(--down-red); }
+    .mc-options-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+    @media (max-width: 600px) { .mc-options-row { grid-template-columns: 1fr; } }
+    .mc-card-btn { padding: 14px 18px; border-radius: 12px; border: 2px solid #94a3b8; background: #fff; font-size: calc(16px * var(--scale)); font-weight: 900; text-align: left; cursor: pointer; transition: all 0.2s; }
+    .mc-card-btn:hover { border-color: var(--blue); background: #eff6ff; }
+    .mc-card-btn.eliminated { opacity: 0.28; text-decoration: line-through; background: #e2e8f0; border-color: #cbd5e1; }
+
+    .helper-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--blue); background: var(--blue-light); color: #1e3a8a; font-weight: 900; font-size: calc(12.5px * var(--scale)); cursor: pointer; }
+    .helper-btn:hover { background: var(--blue); color: #fff; }
+
+    .feedback-box { margin-top: 12px; padding: 16px 18px; border-radius: 14px; font-size: calc(14.5px * var(--scale)); font-weight: 700; display: none; line-height: 1.65; }
+    .fb-ok { background: var(--up-bg); border: 2px solid var(--up-green); color: #064e3b; }
+    .fb-err { background: var(--down-bg); border: 2px solid var(--down-red); color: #881337; }
+
+    .footer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 12px; border-top: 2px solid #e2e8f0; }
+    .f-nav-btn { padding: 10px 20px; border-radius: 10px; border: 2px solid #cbd5e1; background: #fff; font-weight: 900; font-size: calc(14px * var(--scale)); cursor: pointer; color: #1e3a8a; }
+    .f-nav-btn:hover { background: var(--blue-light); border-color: var(--blue); }
+    .f-primary { background: linear-gradient(135deg, #2563eb, #0284c7); color: #fff; border: none; }
+    .f-primary:hover { opacity: 0.92; }
+  </style>
+</head>
+<body>
+
+<div class="app-wrap">
+  <!-- 頂部：港交所（HKEX）即時看盤報價機 Header（預設開啟「🔥 實戰挑戰」） -->
+  <header class="ticker-header">
+    <div class="th-top">
+      <div class="th-brand">
+        <div class="hkex-logo">HKEX 港交所<br>OTP-C 看盤終端</div>
+        <div>
+          <div class="th-title">基礎個人理財｜第 4 課：股票交易及投資</div>
+          <div class="th-sub">影響股價的三層因素、香港交易所（主板與 GEM）＆ 恒生指數（HSI）分析</div>
+        </div>
+      </div>
+      <div class="th-controls">
+        <div class="diff-switcher" title="切換學習模式：預設為實戰挑戰；如需思維引導與分步回饋可切換至基礎導學">
+          <button class="diff-btn" id="btnBasicMode" onclick="setDifficulty(true)">🌱 基礎導學</button>
+          <button class="diff-btn active-challenge" id="btnChallengeMode" onclick="setDifficulty(false)">🔥 實戰挑戰</button>
+        </div>
+        <div class="stat-pill" id="scoreBadge">📈 積分：0</div>
+        <div class="stat-pill" id="comboBadge" style="color:#fde047; border-color:rgba(251,191,36,0.45);">🔥 連擊：0</div>
+        <button class="ctrl-btn" onclick="reshuffleAll()">🔀 洗牌</button>
+        <button class="ctrl-btn" onclick="toggleZoom()" id="zoomBtn">🔍 大字體：關</button>
+      </div>
+    </div>
+
+    <div class="live-ticker-strip" id="liveTickerStrip">
+      <div class="ticker-box"><span class="tb-name">恒生指數 (HSI)</span><span class="tb-val val-up">▲ 21,450.8 (+1.85%)</span></div>
+      <div class="ticker-box"><span class="tb-name">金融分類指數</span><span class="tb-val val-up">▲ 34,120.5 (+2.10%)</span></div>
+      <div class="ticker-box"><span class="tb-name">公用事業分類指數</span><span class="tb-val val-up">▲ 46,890.0 (+0.55%)</span></div>
+      <div class="ticker-box"><span class="tb-name">地產 ／ 工商業分類</span><span class="tb-val val-down">▼ 29,340.2 (-0.40%)</span></div>
+    </div>
+  </header>
+
+  <!-- 頂部常駐雙引擎沙盒：財經新聞股價因果模擬器 ＆ 主板/GEM/恒指藍籌股篩選器 -->
+  <section class="terminal-sandbox">
+    <div class="ts-top" onclick="toggleSandbox()">
+      <div class="ts-title">🎛️ 互動「突發財經新聞股價因果鏈模擬器 ＆ 主板／GEM／藍籌股資格審核器」（點擊展開／收起）</div>
+      <button class="ts-toggle" id="tsToggleBtn">收起模擬器 ▲</button>
+    </div>
+    <div class="ts-body" id="tsBody">
+      <div class="ts-mode-bar">
+        <button class="tsm-btn active" id="tsm0" onclick="switchTsTool(0)">📰 工具一：突發財經新聞對股價的影響因果鏈</button>
+        <button class="tsm-btn" id="tsm1" onclick="switchTsTool(1)">🏛️ 工具二：主板 vs GEM 對比 ＆ 恒指成份股（藍籌股）資格審核</button>
+      </div>
+      <div id="tsInteractiveArea"></div>
+    </div>
+  </section>
+
+  <!-- 四大實戰工作區導航 -->
+  <nav class="zone-nav">
+    <button class="z-tab active" onclick="switchZone(0)" id="zTab0">
+      <span class="zt-icon">📰</span>
+      <span class="zt-title">影響股價三層因素</span>
+      <span class="zt-sub">宏觀經濟、行業、企業與投機</span>
+    </button>
+    <button class="z-tab" onclick="switchZone(1)" id="zTab1">
+      <span class="zt-icon">🏛️</span>
+      <span class="zt-title">港交所：主板與 GEM</span>
+      <span class="zt-sub">證券種類、市值計算與平台比較</span>
+    </button>
+    <button class="z-tab" onclick="switchZone(2)" id="zTab2">
+      <span class="zt-icon">📊</span>
+      <span class="zt-title">恒生指數 (HSI) 分析</span>
+      <span class="zt-sub">藍籌股資格、分類指數與重要性</span>
+    </button>
+    <button class="z-tab" onclick="switchZone(3)" id="zTab3">
+      <span class="zt-icon">🏆</span>
+      <span class="zt-title">捉錯與消去雙擂台</span>
+      <span class="zt-sub">紅筆批改 ＋ 組合選擇題</span>
+    </button>
+  </nav>
+
+  <!-- 主舞台 -->
+  <main class="main-stage" id="mainStage"></main>
+</div>
+
+<script>
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ==================== 雙軌學習難度狀態（預設為實戰挑戰模式） ====================
+  let isBasicMode = false;
+
+  function setDifficulty(basic) {
+    isBasicMode = basic;
+    document.getElementById("btnBasicMode").className = "diff-btn" + (basic ? " active-basic" : "");
+    document.getElementById("btnChallengeMode").className = "diff-btn" + (!basic ? " active-challenge" : "");
+    renderStage();
+  }
+
+  function getModeBadgeHtml() {
+    return isBasicMode
+      ? `<span class="mode-pill-indicator mp-basic">🌱 基礎導學模式（思維引導＋分步回饋）</span>`
+      : `<span class="mode-pill-indicator mp-challenge">🔥 實戰挑戰模式（標準考試難度）</span>`;
+  }
+
+  // ==================== 頂部沙盒工具邏輯 ====================
+  let tsOpen = true;
+  let tsToolIdx = 0;
+  let curNewsIdx = 0;
+  let curBoardIdx = 0;
+
+  const newsEvents = [
+    {
+      btn: "1. 本地經濟強勁復甦",
+      layer: "第一層：宏觀經濟因素（經濟狀況）",
+      dir: "上升 ▲",
+      dirColor: "#34d399",
+      chain: "本地經濟表現良好 ➔ 市民收入普遍上升，投資和消費意欲（及對商舖、住宅、消費品的需求）增加 ➔ 企業能夠賺取更多利潤（盈利能力及前景理想）➔ 市場對股票的需求增加 ➔ <strong>經濟體系內大部分股票價格上升 ▲</strong>"
+    },
+    {
+      btn: "2. 銀行體系調高借貸利率",
+      layer: "第一層：宏觀經濟因素（利率）",
+      dir: "下跌 ▼",
+      dirColor: "#fb7185",
+      chain: "市場利率上升（與股價呈反向關係！）➔ 企業借款融資須支付較多利息（借款成本上升）➔ 企業的營運成本因而增加，同時市民借貸消費及置業意欲下降 ➔ 企業利潤減少 ➔ <strong>股票吸引力及需求下降，股價下跌 ▼</strong>"
+    },
+    {
+      btn: "3. 營運地區政局動盪不穩",
+      layer: "第一層：宏觀經濟因素（政局）",
+      dir: "下跌 ▼",
+      dirColor: "#fb7185",
+      chain: "營運地區政局不穩或國際關係緊張 ➔ 商業活動受阻且未來前景變得不明朗 ➔ 投資者對當地的公司失去信心並拋售股票 ➔ <strong>該地區（甚至全球）股市大跌 ▼</strong>"
+    },
+    {
+      btn: "4. 政府向特定行業提供稅務寬減",
+      layer: "第二層：行業因素（影響特定行業前景）",
+      dir: "受惠行業股價上升 ▲",
+      dirColor: "#34d399",
+      chain: "政府對個別行業（如綠色新能源業）實施扶持政策或稅務寬減 ➔ 降低該行業的整體營運成本並改善行業發展前景 ➔ 投資者看好該行業的盈利增長 ➔ <strong>該行業內大部分企業的股價傾向一同上升 ▲</strong>"
+    },
+    {
+      btn: "5. 個別企業宣布提高派息率",
+      layer: "第三層：企業特有因素（派息政策）",
+      dir: "個別公司股價上升 ▲",
+      dirColor: "#34d399",
+      chain: "個別上市公司宣布增加派息率（把更多利潤分發給普通股股東）➔ 普通股股東可賺取較大股息回報 ➔ 該公司股票的吸引力上升，吸引更多投資者買入（需求增加）➔ <strong>推高該公司的股價 ▲</strong>（相反，若削減或取消派息則會令股價急跌）"
+    },
+    {
+      btn: "6. 負面傳聞引發過多投機拋售",
+      layer: "其他因素：投機活動（短線買賣）",
+      dir: "股價異常暴跌 ▼",
+      dirColor: "#fb7185",
+      chain: "突然出現與某公司相關的負面消息或財政困難傳聞 ➔ 短線投機者預期股價下跌而率先沽貨，小投資者為免蒙受損失亦變得不理性而急於恐慌性拋售 ➔ 造成<strong>過多的投機活動，令該公司股價在短期內異常暴跌 ▼</strong>"
+    }
+  ];
+
+  const boardComparisons = [
+    {
+      tab: "🏢 1. 香港交易所「主板（Main Board）」",
+      content: "• <strong>目標公司</strong>：較大型、成熟和財政穩健的公司（在主板上市的公司數目遠多於 GEM）。<br>• <strong>上市要求</strong>：較嚴謹（申請上市的公司除須通過<strong>盈利或收入測試</strong>外，還須在上市時達到較大的市值）。<br>• <strong>投資風險</strong>：較低（因已通過盈利或收入測試，具備一定盈利能力，股價普遍較穩定，大幅下跌機會較低）。"
+    },
+    {
+      tab: "🚀 2. 香港交易所「GEM（前稱創業板）」",
+      content: "• <strong>目標公司</strong>：中小型企業（為成長型中小企提供集資平台）。<br>• <strong>上市要求</strong>：較寬鬆（申請在 GEM 上市的公司<strong>無須符合盈利或收入要求</strong>）。<br>• <strong>投資風險</strong>：較高（由於盈利能力不確定，雖然可能快速增長，但錄得嚴重虧損和破產的機會較高，股價波動很大）。"
+    },
+    {
+      tab: "🌟 3. 恒生指數成份股（藍籌股）資格審核",
+      content: "• <strong>三大入選資格</strong>：① 必須是<strong>財政穩健的非外國公司</strong>（即並非來自中國以外地區，故歐美外國公司不能成為恒指成份股）；② 必須在香港交易所<strong>主板上市</strong>（<strong>在 GEM 上市的股票不能成為恒指成份股！</strong>），且公司市值龐大及成交最活躍；③ 一般而言要在港交所<strong>上市達兩年</strong>。<br>• <strong>四大分類指數</strong>：所有恒指成份股均納入<strong>「金融」、「公用事業」、「地產」及「工商業」</strong>四個分類指數中。"
+    }
+  ];
+
+  function toggleSandbox() {
+    tsOpen = !tsOpen;
+    document.getElementById("tsBody").style.display = tsOpen ? "block" : "none";
+    document.getElementById("tsToggleBtn").innerText = tsOpen ? "收起模擬器 ▲" : "展開模擬器 ▼";
+  }
+
+  function switchTsTool(t) {
+    tsToolIdx = t;
+    document.getElementById("tsm0").className = "tsm-btn" + (t === 0 ? " active" : "");
+    document.getElementById("tsm1").className = "tsm-btn" + (t === 1 ? " active" : "");
+    renderTsArea();
+  }
+
+  function selectNews(idx) {
+    curNewsIdx = idx;
+    renderTsArea();
+  }
+
+  function selectBoard(idx) {
+    curBoardIdx = idx;
+    renderTsArea();
+  }
+
+  function renderTsArea() {
+    const box = document.getElementById("tsInteractiveArea");
+    if (tsToolIdx === 0) {
+      const btns = newsEvents.map((n, idx) => `
+        <button class="news-btn ${curNewsIdx === idx ? 'active' : ''}" onclick="selectNews(${idx})">📰 ${n.btn}</button>
+      `).join("");
+      const curN = newsEvents[curNewsIdx];
+      box.innerHTML = `
+        <div class="news-grid">${btns}</div>
+        <div class="chain-display">
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:6px;">
+            <span style="color:#fde047; font-weight:900;">🔍 所屬層次：${curN.layer}</span>
+            <span style="color:${curN.dirColor}; font-weight:900; font-size:calc(15px * var(--scale));">📊 股價變動結果：${curN.dir}</span>
+          </div>
+          <div>🔗 <strong>標準因果解釋鏈</strong>：${curN.chain}</div>
+        </div>
+      `;
+    } else {
+      const btns = boardComparisons.map((b, idx) => `
+        <button class="news-btn ${curBoardIdx === idx ? 'active' : ''}" onclick="selectBoard(${idx})">${b.tab}</button>
+      `).join("");
+      const curB = boardComparisons[curBoardIdx];
+      box.innerHTML = `
+        <div class="news-grid">${btns}</div>
+        <div class="chain-display">${curB.content}</div>
+      `;
+    }
+  }
+
+  // ==================== 工作區 1：影響股價三層因素（啟發式思維引導） ====================
+  let zone0Cases = [
+    {
+      title: "股價因素實戰 1：經濟復甦、加息週期與跨境交通政策對上市酒店及餐飲集團的影響",
+      tag: "因果鏈分析 ｜ 宏觀經濟因素（經濟狀況、利率）＋ 行業因素 ＋ 企業特有因素",
+      guideHint: "思維引導：分析股價變動請緊扣「事件 ➔ 企業盈利能力／前景 ➔ 股票市場需求 ➔ 股價升跌」：① 經濟復甦及跨境高鐵開通如何影響訪港旅客量與酒店營業額？ ➔ ② 銀行調高商業貸款利率會令企業的借貸融資成本上升還是下降？利率與股價呈正向還是反向關係？ ➔ ③ 個別公司改變派息政策屬於哪一層次的因素？",
+      desc: "請根據「因素如何影響企業盈利能力或前景，繼而影響市場對該股票的需求」的邏輯，分析以下兩家香港上市公司的股價變化：<br>• <strong>星海渡假酒店集團</strong>：在香港經營多間大型渡假酒店。近期本地<strong>經濟強勁復甦</strong>，而且政府宣布開通全新的<strong>跨境高鐵專線並擴大自由行城市名單</strong>。<br>• <strong>翠華軒餐飲集團</strong>：在本港設有二十間連鎖酒樓。近期銀行體系宣布<strong>大幅調高商業貸款利率</strong>；不過該集團管理層同時宣布，將本年度的<strong>普通股派息率大幅提高</strong>。",
+      tableHtml: "",
+      q1: "1️⃣ 當本地經濟強勁復甦，且政府開通跨境高鐵專線擴大自由行名單時，「星海渡假酒店集團」的股價會如何變化？原因為何？",
+      opts1: [
+        { text: "股價會上升；因為經濟復甦令市民消費意欲增加，加上跨境交通便利及自由行擴大會吸引更多旅客來港入住酒店，令酒店集團的營業額、盈利能力及業務前景轉佳，市場對其股票的需求增加，從而推高股價", ok: true, basicKeep: true },
+        { text: "股價會下跌；因為旅客人數增加會令酒店的清潔及水電開支上升，必然導致酒店集團錄得嚴重虧損", ok: false, basicKeep: true },
+        { text: "股價會維持不變；因為政府的交通及旅遊政策只會影響運輸業，對酒店業的盈利與股價沒有任何影響", ok: false, basicKeep: false },
+        { text: "股價會上升；因為當經濟復甦時，香港交易所會自動調高所有上市酒店集團的股票面值", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 撇除其他因素，銀行體系「大幅調高商業貸款利率」這項宏觀經濟因素，會如何影響「翠華軒餐飲集團」的股價？",
+      opts2: [
+        { text: "股價會傾向下跌；因為利率上升會增加企業借貸融資的利息成本，令餐飲集團的營運成本上升及利潤減少（同時市民借貸消費意欲下降），削弱其股票吸引力及需求，導致股價下跌", ok: true, basicKeep: true },
+        { text: "股價會傾向上升；因為市場利率與股票價格一般呈正向關係，加息會直接推高所有上市公司的股價", ok: false, basicKeep: true },
+        { text: "股價會傾向上升；因為貸款利率上升會令餐飲集團向食客收取的茶芥及食品價格自動倍增", ok: false, basicKeep: false },
+        { text: "利率變動只會影響銀行業的股價，對餐飲及零售業的營運成本與股價完全沒有影響", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 撇除加息因素，「翠華軒餐飲集團」宣布將本年度的「普通股派息率大幅提高」，這屬於哪個層次的因素？會如何影響其股價？",
+      opts3: [
+        { text: "屬於第三層「企業特有因素（派息政策）」；提高派息率令普通股股東可獲發更多股息回報，提升該公司股票對投資者的吸引力，令市場對該股票的需求增加，繼而推高股價", ok: true, basicKeep: true },
+        { text: "屬於第一層「宏觀經濟因素」；提高派息率會增加公司的營業費用並減少純利，導致股價立即暴跌", ok: false, basicKeep: true },
+        { text: "屬於第二層「行業因素」；這會令全香港所有飲食業上市公司的股價在同一日全部上升", ok: false, basicKeep: false },
+        { text: "派息政策只會影響公司債券持有人的利息收入，對普通股的市場需求與股價沒有任何影響", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>解釋任何因素如何影響公司股價時，必須緊扣兩大得分關鍵：**① 該因素如何影響公司的盈利能力或前景（或股東回報）** ➔ **② 如何影響市場對該公司股票的需求（吸引力）** ➔ **③ 導致股價上升或下跌**：<br>• **經濟復甦及便利旅客政策**：消費及旅客需求 $\\uparrow \\implies$ 酒店盈利及前景理想 $\\implies$ 股票需求 $\\uparrow \\implies$ **股價上升**。<br>• **利率上升（宏觀經濟因素）**：企業借貸利息成本 $\\uparrow \\implies$ 營運成本 $\\uparrow$ 及利潤 $\\downarrow \\implies$ 股票需求 $\\downarrow \\implies$ **股價下跌**（利率與股價呈反向關係）。<br>• **提高派息率（企業特有因素）**：股東股息回報 $\\uparrow \\implies$ 股票吸引力及需求 $\\uparrow \\implies$ **股價上升**！"
+    },
+    {
+      title: "股價因素實戰 2：原材料價格波動與突發事件對不同行業及個別企業的差異影響",
+      tag: "行業因素 vs 企業特有因素 ｜ 國際原材料價格波動與產品安全回收事件",
+      guideHint: "思維引導：① 思考「電池原材料價格急升」與「旗下車款起火須全球回收」如何雙重打擊電動車公司的生產成本、品牌商譽及盈利前景？ ➔ ② 政府提供綠色能源安裝補貼如何改善太陽能行業的前景？當某行業出現不利因素時，是否行內「每一家」公司的股價都必定毫無例外地下跌？ ➔ ③ 當負面消息引發小投資者恐慌性爭相沽貨時，過多的投機活動會令股價出現甚麼現象？",
+      desc: "國際市場近期發生兩宗重大事件：<br>• <strong>事件一</strong>：由於海外主要礦場發生嚴重工業意外而停產，全球<strong>鋰電池原材料價格急劇飆升</strong>；與此同時，政府宣布向安裝太陽能發電板的大廈提供高額<strong>綠色能源補貼</strong>。<br>• <strong>事件二</strong>：本港上市的「極速電動車有限公司」旗下一款熱賣電動車，因電池系統故障發生起火意外，公司宣布<strong>緊急全球回收該型號電動車並暫停銷售</strong>。另一家本港上市公司「藍天太陽能科技有限公司」則專門研發及安裝太陽能發電系統。",
+      tableHtml: "",
+      q1: "1️⃣ 「全球鋰電池原材料價格飆升」及「極速電動車宣布全球回收故障型號」，會如何影響「極速電動車有限公司」的股價？",
+      opts1: [
+        { text: "兩項事件都會令其股價下跌！鋰電池原材料價格飆升會推高電動車生產商的生產成本（行業因素）；而起火及全球回收行動則會嚴重打擊消費者對該品牌的信心並招致巨額回收成本（企業特有因素），令銷量、利潤及前景大跌，導致股價下跌", ok: true, basicKeep: true },
+        { text: "原材料價格飆升會令電動車股價上升；只有全球回收行動才會令其股價下跌", ok: false, basicKeep: true },
+        { text: "全球回收行動展現了良好的企業社會責任，因此必定會令極速電動車的股價在消息公布後即時飆升", ok: false, basicKeep: false },
+        { text: "兩項事件均屬於投機活動，對極速電動車的盈利能力與股價沒有任何實質影響", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 另一方面，政府推出「高額綠色能源安裝補貼」，會如何影響「藍天太陽能科技有限公司」的股價？若某行業出現不利的行業因素，是否代表該行業內「所有」公司的股價都必定下跌？",
+      opts2: [
+        { text: "藍天太陽能的股價會上升（因政府補貼刺激市場對太陽能系統的需求，改善行業前景與公司盈利）；而且即使某行業出現不利的行業因素，亦【不一定】令行內所有公司的股價全部下跌（雖然同業股價傾向一同升跌，但個別企業受影響程度不同，若有技術突破仍可能逆市上升）", ok: true, basicKeep: true },
+        { text: "藍天太陽能的股價會下跌；而且凡出現不利的行業因素，該行業內每一家上市公司的股價都必定毫無例外地全部下跌", ok: false, basicKeep: true },
+        { text: "政府對個別行業實施的補貼政策屬於「企業特有因素」，只會影響藍天太陽能一家公司，不會影響行內其他太陽能公司", ok: false, basicKeep: false },
+        { text: "藍天太陽能的股價不會受任何政府政策影響，因為科技公司的股價只取決於股票市場的整體規模", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 當「極速電動車」爆出電池起火及停售的負面消息時，市場上出現大量短線投資者恐慌性急於拋售股票。這種「過多的投機活動」會對股價構成甚麼影響？",
+      opts3: [
+        { text: "投機者旨在透過短線買賣賺取利潤（預期股價跌便賣出）；當負面消息傳出時，小投資者為免蒙受重大損失或會變得不理性而急於爭相拋售股票，造成「過多的投機活動」，令該公司股價在短時間內出現異常暴跌", ok: true, basicKeep: true },
+        { text: "任何投機活動在股票市場上都屬於違法行為，一旦出現投機買賣，香港交易所便會永久取消該公司的上市地位", ok: false, basicKeep: false },
+        { text: "過多的投機拋售活動會令市場對該股票的需求大增，從而令股價在短期內異常急升", ok: false, basicKeep: true },
+        { text: "投機者只會根據公司過去十年的歷史成本數據作長線投資，因此投機活動只會令股價變得完全靜止不動", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **行業因素 vs 企業特有因素**：政府對特定行業的政策、原材料或燃油價格變動，會影響行內大部分企業的成本與前景，屬**行業因素**；而個別公司的產品回收、裁員、技術突破或盈利警告，則屬**企業特有因素**。<br>2. **同業股價傾向（防伏要點）**：同一行業的企業雖然受不同程度影響，但股價往往**傾向**一同升跌；惟切記不可絕對化地說「不利行業因素必令行內【所有】公司股價下跌」！<br>3. **過多的投機活動**：正常的投機活動不會造成異常波動，但當突發正／負面消息引發不理性追捧或恐慌性拋售時，**過多的投機活動**便會令股價異常急升或暴跌！"
+    },
+    {
+      title: "股價因素實戰 3：跨課綜合分析——航運集團提高派息率對「優先股股東」收入與普通股股價的影響",
+      tag: "結合第 3 課優先股特性 ｜ 優先股固定股息 vs 普通股不固定股息與股價影響程度比較",
+      guideHint: "思維引導：① 請留意張女士持有的是「優先股」而非普通股！回想第 3 課：優先股的股息率是固定還是浮動的？當公司宣布提高派息率時，獲發額外股息的是哪一類股東？ ➔ ② 當公司降低普通股派息率且市場加息時，對普通股吸引力有何影響？ ➔ ③ 比較戰爭、嚴重經濟衰退、大幅增派息與日常微調文員薪金，哪一項對股價影響最輕微？",
+      desc: "張女士是本港上市公司「環球航運集團」的<strong>優先股股東</strong>（持有 50,000 股優先股，固定股息率為每年 6%）。由於今年全球航運需求暢旺，環球航運集團錄得破紀錄盈利，董事局宣布將本年度的<strong>派息率大幅提高 40%</strong>。",
+      tableHtml: "",
+      q1: "1️⃣ 環球航運集團宣布將本年度派息率大幅提高 40%，這個消息會否影響張女士（優先股股東）今年的股息收入？為甚麼？",
+      opts1: [
+        { text: "不會影響張女士今年的股息收入！因為張女士持有的是「優先股」，優先股的股息率是固定的（每年固定為 6%），公司提高派息率只會增加「普通股股東」獲發的股息，優先股股東獲發的固定股息金額不會因而改變", ok: true, basicKeep: true },
+        { text: "會影響！張女士今年的股息收入會立即增加 40%，因為優先股股東享有比普通股股東優先獲發額外股息的權利", ok: false, basicKeep: true },
+        { text: "不會影響！因為上市公司股東只會獲發固定的「債券利息」，而不會獲發任何股息", ok: false, basicKeep: false },
+        { text: "會影響！因為當公司提高普通股派息率時，必須先扣減優先股股東的固定股息作為補貼", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 相反，如果另一家上市零售集團在「本年度利潤大幅增加的情況下，反而宣布降低普通股派息率」，同時市場出現「利率上升」，這兩項情況會如何影響該零售集團的普通股股價？",
+      opts2: [
+        { text: "兩項情況都會導致該零售集團的股價下跌！利率上升會增加借貸及營運成本；而在利潤增加下仍降低派息率，會令普通股股東獲發的股息回報減少，削弱股票對投資者的吸引力及需求，導致股價下跌", ok: true, basicKeep: true },
+        { text: "只要該零售集團本年度的利潤增加，即使降低派息率及面對市場加息，其股價仍必定會大幅上升", ok: false, basicKeep: true },
+        { text: "降低派息率會令公司保留更多現金，因此必定會在消息公布當日即時推高普通股股價", ok: false, basicKeep: false },
+        { text: "利率上升會增加零售集團的存款利息收入，因此會令其股價急升", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 某上市公司在甲國經營業務。比較以下四項事件，哪一項對該公司股價的影響通常【最小】？哪一項因素【不屬於】影響股價的主要因素？",
+      opts3: [
+        { text: "在「鄰國向甲國宣戰」、「甲國出現嚴重經濟衰退」、「公司宣布大幅增加派息」與「公司按通脹微調辦公室文員薪金」四者中，以「微調文員薪金（日常營運微調）」對股價影響最小；而「股票市場的規模」則不屬於影響個別公司股價的主要因素", ok: true, basicKeep: true },
+        { text: "「鄰國向甲國宣戰」對股價的影響最小；而「公司的盈利能力」不屬於影響股價的主要因素", ok: false, basicKeep: true },
+        { text: "「公司宣布大幅增加派息」對股價的影響最小；而「政局與經濟狀況」不屬於影響股價的主要因素", ok: false, basicKeep: false },
+        { text: "四項事件對該公司股價的影響程度完全相同", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **跨課高階防伏（優先股 vs 普通股）**：**優先股的股息率是固定的**（保證獲發固定股息，但無投票權）。當公司宣布提高派息率時，受惠而增加股息收入的是**普通股股東**，**優先股股東當年的股息收入並不會改變**；不過提高派息率會吸引更多投資者買入該公司的普通股，令普通股**股價上升**！<br>2. **利潤增加但減派息的陷阱**：即使公司利潤增加，若宣布**降低派息率**，股東分得的股息回報減少，股票吸引力下降，仍會令股價傾向下跌！"
+    }
+  ];
+
+  // ==================== 工作區 2：香港交易所、市價總值、主板與 GEM（啟發式思維引導） ====================
+  let zone1Cases = [
+    {
+      title: "交易平台實戰 1：證券的三大種類、香港交易所（聯交所）與「市價總值」計算",
+      tag: "股票 vs 證券（認股權證／窩輪、債券）｜ 公司市值計算與買賣股票三步驟",
+      guideHint: "思維引導：① 對照下方表格分辨「證券」與「股票」的包含關係（證券除了股票外還包括哪兩類？） ➔ ② 計算一家上市公司的「市價總值（市值）」時，應將已發行股份數目乘以「每股市場價格」還是「每股帳面面值」？ ➔ ③ 回想個人投資者透過經紀及電子系統買賣港股的三個步驟與四項交易費用。",
+      desc: "「天際物流控股有限公司」是一家在香港聯合交易所有限公司（簡稱<strong>聯交所</strong>，由<strong>香港交易所／港交所</strong>全資擁有）上市的大型企業。該公司目前已發行股份總數為 <strong>50 億股</strong>（每股帳面面值為 $0.5），而今天收市時該公司股票的<strong>每股市場價格為 $12</strong>。",
+      tableHtml: `
+        <table class="info-table">
+          <thead><tr><th>證券（Securities）的三大常見類別</th><th>法律文件證明持有人享有的權利</th></tr></thead>
+          <tbody>
+            <tr><td>1. 股票（Stock / Share）</td><td>證明持有人持有有限公司的部分擁有權（股東／東主）</td></tr>
+            <tr><td>2. 認股權證（Warrant，又稱認股證，俗稱「窩輪」）</td><td>證明持有人有權在特定期間按特定價格購買公司的股票</td></tr>
+            <tr><td>3. 債券（Bond）</td><td>證明持有人曾借款給公司或政府（債權人，到期收回本金及獲發固定利息）</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 下列哪項有關「證券」、「股票」與「香港交易所」的描述是正確的？",
+      opts1: [
+        { text: "「股票」只是「證券」的一種（證券還包括認股權證／窩輪及債券等）；香港聯合交易所有限公司（聯交所／香港交易所）是香港唯一的股票交易所，除股票外，債券及期貨等其他證券亦可在香港交易所上市和交易", ok: true, basicKeep: true },
+        { text: "「股票」與「證券」的意思完全相同，債券及認股權證並不屬於證券；而且香港目前共有三家獨立運作的股票交易所", ok: false, basicKeep: true },
+        { text: "股票投資者必須親自前往香港交易所的實體交易大堂出價，才可買賣香港上市股票", ok: false, basicKeep: false },
+        { text: "認股權證（窩輪）是一份證明持有人曾借款給上市公司的長期債務票據", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 「市價總值（市值，Market Capitalisation）」在財務學上有哪兩種意思？根據上述資料，「天際物流控股有限公司」今天的市價總值是多少？",
+      opts2: [
+        { text: "市值可指「一家上市公司所有已發行股份的市場價值」或「在股票交易所上市的所有股票的總值（常用作反映股票市場發展階段的指標）」；天際物流的市價總值 ＝ 每股市價 $12 × 已發行股數 50 億股 ＝ 600 億港元", ok: true, basicKeep: true },
+        { text: "市值是指一家上市公司在財務狀況表內的資產淨值；天際物流的市價總值 ＝ 每股面值 $0.5 × 50 億股 ＝ 25 億港元", ok: false, basicKeep: true },
+        { text: "市值是指一家上市公司在全年度賺取的純利總額；天際物流的市價總值為 575 億港元", ok: false, basicKeep: false },
+        { text: "全球市價總值最大的股票交易所是香港交易所，其次才是紐約證券交易所", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 個人投資者在香港交易所買賣「天際物流」的股票時，須經過哪三個步驟？並須支付哪四項主要交易費用？",
+      opts3: [
+        { text: "步驟：① 投資者向股票經紀發出交易指令 ➔ ② 經紀把指示輸入交易所的電腦系統（領航星交易平台 OTP-C）➔ ③ 投資者支付各類交易費用（包括：經紀佣金、印花稅、交易徵費 及 港交所交易費）", ok: true, basicKeep: true },
+        { text: "步驟：① 投資者直接向天際物流董事局遞交支票 ➔ ② 由公司主席審批轉讓 ➔ ③ 支付利得稅及商業登記費", ok: false, basicKeep: true },
+        { text: "在香港交易所買賣上市股票完全免收任何印花稅、經紀佣金或交易徵費", ok: false, basicKeep: false },
+        { text: "投資者買賣股票只須支付銀行透支利息，無須支付政府印花稅", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **股票 vs 證券**：證券是一份法律文件，涵蓋**股票（證明持有公司擁有權）**、**認股權證／窩輪（證明有權以特定價格購買公司股票）**及**債券（證明曾借款給公司或政府）**。<br>2. **市價總值（市值）**：一家上市公司的市價總值 $= \\text{每股市場價格} \\times \\text{公司所發行的股份數目}$（即 $\\$12 \\times 50\\text{ 億股} = 600\\text{ 億港元}$，與票面值無關）；而股票交易所的市價總值則是所上市股票的總值，常用作反映某股票市場發展階段的指標！"
+    },
+    {
+      title: "交易平台實戰 2：香港交易所「主板」與「GEM（前稱創業板）」的功能與全面比較",
+      tag: "主板 vs GEM ｜ 上市要求（盈利或收入測試）、目標公司、上市公司數目與投資風險",
+      guideHint: "思維引導：對照下方「主板 vs GEM」比較表：① 思考股票交易平台對「企業（發行股票集資）」與對「投資者（買賣上市股票）」分別提供甚麼核心功能？ ➔ ② 比較兩個平台在「上市時有否盈利或收入要求」上的分別，這如何影響 GEM 上市公司的盈利確定性與股價波動風險？ ➔ ③ 剛退休人士風險承受能力較低，若要買股票應選哪一個平台？",
+      desc: "香港交易所提供兩個平台讓公司上市發行股票，分別是<strong>主板（Main Board）</strong>和 <strong>GEM（前稱創業板）</strong>。剛滿 65 歲退休並提取了強積金累算權益的林伯，見銀行儲蓄存款利率很低，決定把部分退休金投資在股票市場以獲取較高回報，正考慮應投資「主板股票」還是「GEM 股票」。",
+      tableHtml: `
+        <table class="info-table">
+          <thead><tr><th>比較維度</th><th>主板（Main Board）</th><th>GEM（前稱創業板）</th></tr></thead>
+          <tbody>
+            <tr><td>上市要求</td><td>較嚴謹（須通過盈利或收入測試，且上市時須達較大市值）</td><td>較寬鬆（無須符合盈利或收入要求）</td></tr>
+            <tr><td>目標公司與上市公司數目</td><td>較大型和穩健的公司（在此平台上市的公司數目遠多於 GEM）</td><td>中小型企業（供成長型中小企集資的平台）</td></tr>
+            <tr><td>投資風險與股價波動</td><td>較低（已具備一定盈利能力，股價普遍較穩定，大跌機會較低）</td><td>較高（盈利能力不確定，錄得嚴重虧損和破產機會較高，股價波動大）</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 香港交易所旗下的「主板」和「GEM」兩個交易平台，有哪兩項共同的主要功能？",
+      opts1: [
+        { text: "① 為符合上市要求的企業提供一個在香港上市發行股票以「籌集資金（集資）」的渠道／平台；② 為投資者提供一個公開、有規範地「買賣上市股票（進行證券交易）」的場所（且兩個平台均由香港交易所營運）", ok: true, basicKeep: true },
+        { text: "① 保證所有在平台上市的公司每年必定派發固定股息；② 為所有個人股票投資者提供百分百的本金保障", ok: false, basicKeep: true },
+        { text: "① 負責為全港上市公司編製年度財務報表；② 負責向虧損的上市公司提供免息財政貸款支援", ok: false, basicKeep: false },
+        { text: "主板只負責買賣政府債券，而 GEM 則只負責買賣衍生認股權證（窩輪）", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 為甚麼與在主板上市的公司相比，投資在「GEM」上市的公司所涉及的風險較高？",
+      opts2: [
+        { text: "因為申請在 GEM 上市的公司無須符合盈利或收入要求，其「盈利能力不確定」（雖然這些中小型企業可能快速增長，但錄得嚴重虧損和破產的機會亦較高，因此股價波動很大）", ok: true, basicKeep: true },
+        { text: "因為在 GEM 上市的公司全部都是來自海外的外國公司，完全不受香港證券法例監管", ok: false, basicKeep: true },
+        { text: "因為在 GEM 上市的股票不能透過電子交易系統買賣，流動性為零", ok: false, basicKeep: false },
+        { text: "因為主板只供傳統製造業公司上市，而 GEM 則只供高風險的初創科技公司上市", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 為甚麼香港的銀行存款利率通常很低？而剛退休的林伯若想把部分退休金投資股票，他應選擇「主板股票」還是「GEM 股票」？",
+      opts3: [
+        { text: "銀行存款利率很低是因為香港銀行體系完善、銀行破產機會極低（損失存款風險極低，根據風險與回報正向關係，低風險故低回報）；而退休人士林伯應選擇「主板股票」，因為他已無固定工作收入、風險承受能力低，主板公司較大型穩健且已通過盈利或收入測試，股價較穩定、風險較 GEM 低", ok: true, basicKeep: true },
+        { text: "銀行存款利率很低是因為銀行存款的風險回報取捨最高；而林伯應選擇「GEM 股票」以博取最高短期投機回報", ok: false, basicKeep: true },
+        { text: "林伯應選擇「GEM 股票」，因為 GEM 的上市要求比主板更嚴謹，在 GEM 上市的公司全部都是派息穩定的藍籌股", ok: false, basicKeep: false },
+        { text: "主板股票與 GEM 股票的投資風險完全相同，林伯選擇哪一個平台都沒有分別", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **主板 vs GEM 的核心分別**：在於**上市要求（嚴謹、須通過盈利或收入測試 vs 寬鬆、無須符合盈利或收入要求）**、**目標公司（較大型和穩健的公司 vs 中小型企業）**及**投資風險（較低 vs 因盈利能力不確定而風險較高）**。<br>2. **退休人士選股原則**：退休人士已失去工作收入，需依賴退休金維持生活及應付醫療開支，風險承受能力低，因此若投資股市應選業務穩健、已通過盈利測試、股價波動較小的**主板股票**，而不應投資高風險的 GEM 股票！"
+    }
+  ];
+
+  // ==================== 工作區 3：恒生指數（HSI）分析（啟發式思維引導） ====================
+  let zone2Cases = [
+    {
+      title: "恒指分析實戰 1：恒生指數的構成、計算方法、四大分類指數與三大重要性",
+      tag: "恒生指數（HSI）核心檔案 ｜ 市值加權計算、四大分類指數與投資決策三大用處",
+      guideHint: "思維引導：① 對照下方表格檢視恒指的四個分類指數名稱（切勿與香港四大支柱行業混淆！），並思考恒指是否包含 GEM 股票或外國公司 ➔ ② 思考一個反映大市整體走勢的指標，對投資者在「了解整體動向」、「跨時段／跨市場比較」及「評估個別股票表現」上有何幫助 ➔ ③ 當一個加權平均指數上升時，是代表成份股「普遍（整體）」上升，還是「每一隻」都必定同幅上升？",
+      desc: "恒生指數（簡稱恒指）於 1969 年 11 月 24 日推出，是香港最常用的股市指數。恒指從一小部分具代表性的香港上市股票計算出來，這些獲選的成份股在香港又稱為<strong>藍籌股（Blue Chips）</strong>。",
+      tableHtml: `
+        <table class="info-table">
+          <thead><tr><th>恒生指數的四個分類指數</th><th>涵蓋行業範疇與代表性藍籌股性質</th></tr></thead>
+          <tbody>
+            <tr><td>1. 金融（Finance）</td><td>大型上市銀行、保險及金融機構</td></tr>
+            <tr><td>2. 公用事業（Utilities）</td><td>電力、煤氣及公用事業機構</td></tr>
+            <tr><td>3. 地產（Properties）</td><td>大型地產發展商及物業投資集團</td></tr>
+            <tr><td>4. 工商業（Commerce & Industry）</td><td>綜合企業、科技、零售、運輸及製造業等各類工商企業</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 下列哪項有關恒生指數（恒指）「計算方法」、「涵蓋範圍」及「分類指數」的描述是正確的？",
+      opts1: [
+        { text: "恒指是根據所有成份股的「市價總值」並按各成份股的比重（加權）計算出來的；所有成份股均在港交所「主板」上市（不包括 GEM 股票，且歐美等外國公司不能成為成份股）；設有「金融、公用事業、地產、工商業」四個分類指數", ok: true, basicKeep: true },
+        { text: "恒指同時量度在香港交易所「主板和 GEM」以及內地滬深交易所上市的所有股票表現", ok: false, basicKeep: false },
+        { text: "恒指的四個分類指數分別為「金融服務、旅遊、貿易及物流、專業及工商業支援服務」", ok: false, basicKeep: true },
+        { text: "恒生指數本身是一個讓企業發行新股集資的交易平台，並直接列明各成份股公司的派息比率", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 為甚麼恒生指數能準確反映香港股市的整體表現？它對投資者作出投資決策有哪三項主要重要性（用處）？",
+      opts2: [
+        { text: "因為恒指包含了香港股市中「市值最大和成交最活躍（交易頻繁）」的代表性主板股票；三大重要性：① 有助了解香港股市的整體股價動向、② 有助比較股票市場的表現（比較港股在不同時段的表現，或與海外其他股市指數比較）、③ 有助作為基準（Benchmark）評估個別香港股票相對於整體股市的表現", ok: true, basicKeep: true },
+        { text: "三大重要性：① 讓投資者了解香港債券市場及定期存款市場的整體表現、② 保證所有買入恒指成份股的投資者必定不會蒙受資本虧損、③ 為中小型企業提供上市渠道", ok: false, basicKeep: true },
+        { text: "因為恒指包含了在香港註冊的所有私人有限公司與公眾有限公司；其唯一用處是供政府計算利得稅稅率", ok: false, basicKeep: false },
+        { text: "恒生指數只反映香港物業樓價的升跌，與個別上市公司的股票表現無關", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 如果在過去一個季度，「恒生指數累積上升了 8%」，這直接表示在過去一個季度發生了甚麼事？",
+      opts3: [
+        { text: "表示在過去一個季度「恒生指數成份股的市價普遍（整體）上升了」（但並不代表每一隻成份股都上升，亦不代表各分類指數或成交金額均上升了 8%）", ok: true, basicKeep: true },
+        { text: "表示在過去一個季度，所有 50 多隻恒指成份股的股價都毫無例外地各自上升了 8%", ok: false, basicKeep: true },
+        { text: "表示在過去一個季度，「恒生工商業分類指數」及「大市總成交金額」必定同時上升了 8%", ok: false, basicKeep: false },
+        { text: "表示在過去一個季度，所有在 GEM 上市的中小型企業股價都上升了 8%", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **切勿混淆「香港四大支柱行業」與「恒指四個分類指數」**：恒生指數的四個分類指數是**金融、公用事業、地產、工商業**（並不設餐飲業或旅遊業分類指數）！<br>2. **恒指的三大重要性**：① **了解香港股市整體股價動向**（因包含市值最大及成交最活躍的主板股票）；② **比較股票市場表現**（比較港股在過去不同時段的表現，或與美股道指、日經指數等其他股市比較）；③ **評估個別股票表現**（以恒指走勢作為基準 Benchmark，比較自己所持股票跑贏還是跑輸大市）！"
+    },
+    {
+      title: "恒指分析實戰 2：GEM 高盈利公司能否入恒指？為何「恒指上升但個別藍籌股卻同日下跌」？",
+      tag: "藍籌股資格審核 ｜ 解釋個別股票逆市升跌及「被剔出恒指成份股」對股價的影響",
+      guideHint: "思維引導：① 仔細留意案例 A 中「雲端醫療科技」是在哪一個交易平台上市（主板還是 GEM）？對照頂部工具箱的藍籌股三大資格，判斷它能否入選恒指成份股 ➔ ② 恒指是按成份股市值加權計算的整體指標，當佔比重較大的成份股上升時，為何個別成份股仍會在同日下跌（受甚麼因素影響）？ ➔ ③ 思考當一隻股票被剔出恒指成份股時，投資者信心及追蹤恒指的基金會如何反應？",
+      desc: "請分析以下兩個市場案例：<br>• <strong>案例 A（雲端醫療科技）</strong>：「雲端醫療科技」是一家在香港註冊、專門研發智能醫療設備的本地公司，<strong>在香港交易所 GEM 上市至今已滿四年</strong>，且過去兩年盈利翻倍。昨天恒生指數下跌，但雲端醫療科技的股價卻逆市大升 12%。<br>• <strong>案例 B（恒指單日走勢背馳）</strong>：在某交易日，恒生指數較前一天<strong>上升了 1.85%</strong>。同日，藍籌股中的「甲銀行 (+3.9%)」及「乙地產 (+2.4%)」股價上升，但同屬藍籌股的「丙電力 (-0.8%)」及「丁食品 (-1.5%)」股價卻逆市下跌。",
+      tableHtml: `
+        <table class="info-table">
+          <thead><tr><th>某交易日恒生指數表現：▲ +1.85%</th><th>同日上升的恒指成份股</th><th>同日逆市下跌的恒指成份股</th></tr></thead>
+          <tbody>
+            <tr><td>整體指數向上，但個別成份股走勢不一致</td><td>甲銀行：▲ +3.90%<br>乙地產：▲ +2.40%</td><td>丙電力：▼ -0.80%<br>丁食品：▼ -1.50%</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 在「案例 A」中，為何在恒指下跌時「雲端醫療科技」的股價卻能逆市大升？而該公司在 GEM 上市已滿四年且盈利豐厚，是否合資格成為恒生指數的成份股？",
+      opts1: [
+        { text: "逆市大升原因：可能該公司出現正面的「企業特有因素」（如成功研發突破性醫療專利、公布亮麗盈利業績或增加派息）或受惠於醫療行業政策；但它【不合資格】成為恒指成份股，因為恒指成份股必須在香港交易所「主板」上市，在 GEM 上市的股票不能成為恒指成份股！", ok: true, basicKeep: true },
+        { text: "雲端醫療科技【合資格】成為恒指成份股，因為它是財政穩健的本地非外國公司，且上市已超過兩年（已滿四年）", ok: false, basicKeep: true },
+        { text: "雲端醫療科技【不合資格】成為恒指成份股，因為恒生指數規定所有醫療及科技公司均不得納入指數", ok: false, basicKeep: false },
+        { text: "當恒生指數下跌時，市場上所有股票的需求必定同時減少，個別公司不可能逆市上升", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 在「案例 B」中，甲銀行、乙地產、丙電力和丁食品這四隻恒指成份股有何共通點？為何恒指單日上升了 1.85%，但丙電力和丁食品的股價卻在同日下跌？",
+      opts2: [
+        { text: "共通點：它們都是在港交所「主板」上市、市值龐大、成交最活躍且財政穩健的非外國公司（通常上市達兩年）；部分成份股同日下跌是因為：恒指是按所有成份股的市值加權計算以反映「整體（平均）股價動向」，只要佔市值比重較大的大部分成份股（如甲銀行等）升幅足以抵銷少數成份股的跌幅，恒指便會上升，而個別成份股（如丁食品）可能受自身負面企業消息或行業因素影響而逆市下跌", ok: true, basicKeep: true },
+        { text: "共通點：它們都是在 GEM 上市的中小型企業；部分成份股下跌是因為恒生指數與成份股的股價呈反向關係", ok: false, basicKeep: true },
+        { text: "當恒生指數上升時，所有恒指成份股的股價在定義上都必定上升，因此丙電力和丁食品下跌只是交易系統顯示錯誤", ok: false, basicKeep: false },
+        { text: "共通點：這四家公司都屬於恒生指數的「公用事業分類指數」成份股", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 為甚麼恒生指數的成份股名單會不時變動？如果某上市公司因業務萎縮而「被剔出恒指成份股」，為何其股價下跌的機會很大？",
+      opts3: [
+        { text: "因為各上市公司的股票市值與成交量不斷轉變，故恒指成份股會定期檢討及變動；若某公司被剔出恒指成份股，往往反映其市值縮水或業務前景轉差（削弱投資者信心），加上追蹤恒指的投資基金必須沽出該股票，導致市場對該股票的需求大減（拋售增加），故股價下跌機會很大", ok: true, basicKeep: true },
+        { text: "恒指成份股名單自 1969 年推出以來是永久固定不變的；被剔出恒指代表該公司已被勒令停業清盤", ok: false, basicKeep: false },
+        { text: "如果某公司被剔出恒指成份股，該公司的股票便會自動由主板降級至 GEM 買賣，甚至被禁止交易", ok: false, basicKeep: true },
+        { text: "被剔出恒指成份股會令該公司無須再向股東派發任何股息，因此其股價必定會大幅上升", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **藍籌股資格三大鐵律**：① 必須是**財政穩健的非外國公司**（非中國以外地區公司）；② 必須在港交所**主板上市**（**在 GEM 上市的股票絕對不能成為恒指成份股**！），且市值龐大、成交最活躍；③ 一般須**上市達兩年**。<br>2. **指數走勢與個別股票走勢**：恒生指數只能反映**整體股價動向**，部分股票（甚至是恒指成份股）會受其自身的企業特有因素影響，走勢可能會與恒指不一致！"
+    }
+  ];
+
+  // ==================== 工作區 4：捉錯與消去雙擂台（啟發式審題引導，不直接劇透哪句錯） ====================
+  let mod4Sub = 0;
+
+  const redPenCases = [
+    {
+      title: "紅筆捉錯挑戰 1：找出答卷中對「影響股價三層因素與利率關係」的錯句",
+      q: "議題：說明宏觀經濟因素、行業因素及企業特有因素如何影響上市公司的股票價格。",
+      guideHint: "審題切入點：請檢視以下三個概念：① 經濟狀況對大部分股價的影響；② 市場利率與股票價格究竟呈「正向關係」還是「反向關係」（以及不利行業因素是否必令行內「所有」公司股價毫無例外地下跌）；③ 企業特有因素的可控性與派息政策的影響。",
+      chips: [
+        {
+          text: "當經濟表現良好時，市民的收入普遍上升，投資和消費意欲增加，企業能賺取更多利潤，令經濟體系內大部分股票的價格上升。",
+          easyText: "當經濟表現良好時，市民消費意欲增加，企業利潤上升，令大部分股票價格上升。",
+          isFlaw: false
+        },
+        {
+          text: "一般來說，市場利率與股票價格呈正向關係（即利率上升會令股價上升）；而且不利的行業因素必定會令該行業內所有上市公司的股價毫無例外地全部下跌。",
+          easyText: "市場利率與股價呈正向關係（加息令股價上升）；且不利行業因素必令行內所有公司股價全部下跌。",
+          isFlaw: true
+        },
+        {
+          text: "雖然企業無法控制宏觀經濟因素和行業因素，但一般都能控制企業特有因素（如公司表現及派息政策）；當公司增加派息率時，其股價會傾向上升。",
+          easyText: "企業一般能控制企業特有因素（如派息政策）；當增加派息率時，股價會傾向上升。",
+          isFlaw: false
+        }
+      ],
+      exp: "<strong>• 失分原因</strong>：<br>1. **利率與股價一般呈「反向關係」**（而非正向關係）：當利率上升時，企業借款融資的利息成本及營運成本增加，利潤減少，導致股價下跌！<br>2. 不利的行業因素會令行業內**大部分（而非所有）**企業的股價傾向下跌，個別企業受影響程度不同！"
+    },
+    {
+      title: "紅筆捉錯挑戰 2：找出答卷中對「香港交易所、主板與 GEM」的錯句",
+      q: "議題：比較香港交易所旗下的「主板」與「GEM（前稱創業板）」兩個股票交易平台。",
+      guideHint: "審題切入點：請思考兩個問題：① 主板與 GEM 是按「公司規模與穩健程度」區分目標對象，還是按「資訊科技業 vs 傳統製造業」區分？② 投資 GEM 風險較高是因為甚麼原因（盈利能力不確定 vs 非本地公司）？",
+      chips: [
+        {
+          text: "香港聯合交易所有限公司（聯交所）由香港交易所全資擁有，是香港唯一的股票交易所；現今股票交易已改用電子系統（領航星交易平台）進行，實體交易大堂已關閉。",
+          easyText: "聯交所是香港唯一的股票交易所，現已改用電子系統進行交易，實體交易大堂已關閉。",
+          isFlaw: false
+        },
+        {
+          text: "主板以較大型和穩健的公司為目標，上市要求較嚴謹（須通過盈利或收入測試），且在主板上市的公司數目遠多於在 GEM 上市的公司。",
+          easyText: "主板以較大型和穩健的公司為目標，須通過盈利或收入測試，上市公司數目遠多於 GEM。",
+          isFlaw: false
+        },
+        {
+          text: "GEM 以本地資訊科技公司為目標，主板則以傳統製造業公司為目標；由於在 GEM 上市的公司大多是非本地的外國公司，因此投資 GEM 公司的風險比投資主板公司高。",
+          easyText: "GEM 以資訊科技公司為目標，主板以製造業為目標；因 GEM 大多是外國公司故風險較高。",
+          isFlaw: true
+        }
+      ],
+      exp: "<strong>• 失分原因</strong>：<br>1. 主板和 GEM 是按**公司規模與穩健程度**（較大型和穩健的公司 vs 中小型企業）區分目標對象，並非按行業（製造業 vs 資訊科技）或地區區分！<br>2. 投資 GEM 風險較高，是因為 GEM 公司無須符合盈利或收入要求，其**「盈利能力不確定」**（錄得嚴重虧損和破產的機會較高，股價波動大），而並非因為它們是非本地公司！"
+    },
+    {
+      title: "紅筆捉錯挑戰 3：找出答卷中對「恒生指數（HSI）構成與分類指數」的錯句",
+      q: "議題：說明「恒生指數」的成份股資格、分類指數及其反映的市場資訊。",
+      guideHint: "審題切入點：請檢視以下三個恒指概念：① 恒指是否同時包含在 GEM 上市的股票？② 恒指的四個分類指數有沒有「旅遊及餐飲業」？③ 恒指上升是否代表每一隻成份股都上升？",
+      chips: [
+        {
+          text: "恒生指數是根據所有成份股的市價總值並按比重（加權）計算出來的，可讓投資者了解香港股市的整體股價動向、比較不同時段或不同市場的表現，以及作為基準評估個別股票的表現。",
+          easyText: "恒指按成份股市價總值加權計算，有助了解整體股價動向、比較市場表現及評估個別股票。",
+          isFlaw: false
+        },
+        {
+          text: "要獲選為恒指成份股（藍籌股），必須是財政穩健的非外國公司（故歐美外國公司不能成為成份股），並在香港交易所主板上市（一般須上市達兩年）。",
+          easyText: "恒指成份股必須是財政穩健的非外國公司，並在港交所主板上市（一般須上市達兩年）。",
+          isFlaw: false
+        },
+        {
+          text: "恒生指數同時顯示在主板和 GEM 上市的股票走勢，其四個分類指數分別為金融、地產、公用事業和旅遊及餐飲業；當恒指上升時，代表所有恒指成份股的股價都上升。",
+          easyText: "恒指同時顯示主板和 GEM 股票走勢，設旅遊及餐飲業分類指數；恒指上升代表所有成份股都上升。",
+          isFlaw: true
+        }
+      ],
+      exp: "<strong>• 失分原因</strong>：<br>1. 恒指成份股**只在主板上市**，在 GEM 上市的股票不能成為恒指成份股！<br>2. 恒指的四個分類指數是**「金融、公用事業、地產、工商業」**，並沒有「旅遊及餐飲業」！<br>3. 恒指上升只代表成份股的市價**普遍（整體）**上升，個別成份股的股價仍可能同日下跌！"
+    }
+  ];
+
+  let elimMCs = [
+    {
+      title: "消去法實戰 1：恒生指數的本質、分類指數與走勢解讀",
+      stem: "下列哪項有關香港「恒生指數（恒指）」的描述是正確的？",
+      rawStmts: [
+        { text: "恒生指數設有金融、公用事業、地產及工商業四個分類指數；當恒指在某月上升了 5%，表示該月恒指成份股的市價普遍上升了。", hint: "思考方向：核對恒指的四大分類指數名稱，以及恒指上升所代表的整體意義。", isTrue: true, exp: "正確！這四個是恒指的法定分類指數，而恒指上升代表成份股市價整體普遍上升。" },
+        { text: "恒生指數會直接顯示各成份股公司的派息比率，而且當恒指上升 5% 時，代表每一隻恒指成份股的股價及成交金額均上升了 5%。", hint: "思考方向：恒指是一個反映整體股價走勢的加權指數，它會否顯示派息比率？是否代表每隻成份股均同幅上升？", isTrue: false, exp: "錯誤！恒指只反映整體股價走勢，不顯示派息政策，亦不代表所有成份股或成交金額均同幅上升。" },
+        { text: "恒生指數是香港交易所旗下專門供中小型企業發行新股以籌集資金的交易平台。", hint: "思考方向：請分辨「股市指數（恒指）」與「股票交易集資平台（主板及 GEM）」的本質差異。", isTrue: false, exp: "錯誤！恒指只是反映股市表現的「指標（Index）」，主板和 GEM 才是企業籌集資金的交易平台！" }
+      ]
+    },
+    {
+      title: "消去法實戰 2：恒生指數的入選資格與對投資者的用處",
+      stem: "下列哪些有關「恒生指數（恒指）」的特點及用處的陳述是正確的？",
+      rawStmts: [
+        { text: "恒指是按所有成份股的市價總值加權計算出來的，而且來自中國以外地區的外國公司（以及在 GEM 上市的公司）均不能成為恒指成份股。", hint: "思考方向：回想恒指成份股（藍籌股）的入選資格——外國公司及 GEM 上市公司能否入選？", isTrue: true, exp: "正確！恒指成份股必須是在港交所主板上市、財政穩健的非外國公司。" },
+        { text: "透過分析恒指的走勢變化，投資者能比較香港股市在不同時段的整體表現，亦能以此作為基準評估個別香港股票相對於整體股市的表現。", hint: "思考方向：核對恒生指數對投資者分析大市與評估個別股票表現的三大重要性。", isTrue: true, exp: "正確！這是恒生指數對投資者的核心重要性。" },
+        { text: "恒指同時涵蓋在主板和 GEM 上市的股票，並能讓投資者直接了解香港債券市場及定期存款市場的整體表現。", hint: "思考方向：恒生指數是反映哪一個市場（股票、債券還是存款）的指標？有否涵蓋 GEM 股票？", isTrue: false, exp: "錯誤！恒指不包括 GEM 股票，亦只反映股票市場而非債券或存款市場的表現！" }
+      ]
+    },
+    {
+      title: "消去法實戰 3：影響上市公司股價的三層因素與投資決策參考資料",
+      stem: "撇除其他因素，下列哪些有關「影響股票價格的因素」的陳述是正確的？",
+      rawStmts: [
+        { text: "市場借貸利率、政府對行業實施的稅務或監管政策，以及個別公司的員工罷工或產品回收行動，均會影響相關上市公司的股價。", hint: "思考方向：這三項分別屬於宏觀經濟因素、行業因素及企業特有因素，它們會否影響企業盈利前景與股價？", isTrue: true, exp: "正確！這三者分別屬於宏觀經濟因素、行業因素及企業特有因素，均會影響企業盈利前景與股價。" },
+        { text: "當出現「市場利率上升」、「主要原材料或燃油價格飆升」或「公司發出盈利警告（或調低派息率）」時，會導致相關上市公司的股價傾向下跌。", hint: "思考方向：當借貸成本上升、原材料成本飆升或盈利及派息減少時，股票的吸引力及需求會上升還是下降？", isTrue: true, exp: "正確！這三項情況均會削弱企業盈利能力或減少股東回報，令股票需求下降而推低股價。" },
+        { text: "當投資者考慮是否買入某香港上市大型企業的股票時，參考「恒生指數走勢」、「該企業過往數年的盈利業績」及「有關該企業的新聞消息」均有助作出較佳決策。", hint: "思考方向：投資者在買股前結合大市指標、公司過往財務業績與最新企業動向，是否有助評估前景？", isTrue: true, exp: "正確！結合大市指標與企業特有基本面及消息，有助作出明智投資決策。" }
+      ]
+    },
+    {
+      title: "消去法實戰 4：香港交易所「主板」與「GEM」的比較",
+      stem: "下列哪些有關香港交易所旗下「主板」與「GEM」的陳述是正確的？",
+      rawStmts: [
+        { text: "主板和 GEM 均由香港交易及結算所有限公司（香港交易所）營運，為不同規模的公司提供在香港上市集資的渠道。", hint: "思考方向：主板和 GEM 是否同屬香港交易所（聯交所）營運的兩個上市集資平台？", isTrue: true, exp: "正確！兩個平台均由香港交易所全資擁有的聯交所營運。" },
+        { text: "主板以較大型和穩健的公司為目標（上市要求較嚴謹，須通過盈利或收入測試）；GEM 則以中小型企業為目標（上市要求較寬鬆，無須符合盈利或收入要求）。", hint: "思考方向：核對主板與 GEM 在目標公司規模及上市盈利／收入要求上的分別。", isTrue: true, exp: "正確！這是主板與 GEM 在目標公司與上市要求上的核心差異。" },
+        { text: "由於在 GEM 上市的公司數目遠多於主板，且全部屬於海外跨國企業，因此投資主板股票的風險比投資 GEM 股票高。", hint: "思考方向：哪一個平台的上市公司數目較多？主板與 GEM 哪一個的投資風險較高？", isTrue: false, exp: "錯誤！在主板上市的公司數目遠多於 GEM；且 GEM 因無須符合盈利要求（盈利能力不確定），其股價波動及投資風險均比主板【高】！" }
+      ]
+    }
+  ];
+
+  const allComboDefs = [
+    { order: 1, reqTrue: [1], reqFalse: [2, 3], text: "只有 (1)" },
+    { order: 2, reqTrue: [2], reqFalse: [1, 3], text: "只有 (2)" },
+    { order: 3, reqTrue: [3], reqFalse: [1, 2], text: "只有 (3)" },
+    { order: 4, reqTrue: [1, 2], reqFalse: [3], text: "只有 (1) 及 (2)" },
+    { order: 5, reqTrue: [1, 3], reqFalse: [2], text: "只有 (1) 及 (3)" },
+    { order: 6, reqTrue: [2, 3], reqFalse: [1], text: "只有 (2) 及 (3)" },
+    { order: 7, reqTrue: [1, 2, 3], reqFalse: [], text: "(1)、(2) 及 (3)" }
+  ];
+
+  function prepareDynamicMC(mcItem) {
+    const shuffled = shuffle(mcItem.rawStmts);
+    mcItem.stmts = shuffled.map((s, idx) => ({
+      id: idx + 1,
+      text: `(${idx + 1}) ${s.text}`,
+      hint: s.hint,
+      isTrue: s.isTrue,
+      exp: s.exp
+    }));
+    const trueIds = mcItem.stmts.filter(s => s.isTrue).map(s => s.id);
+    const correctCombo = allComboDefs.find(c =>
+      c.reqTrue.length === trueIds.length && c.reqTrue.every(id => trueIds.includes(id))
+    );
+    const wrongPool = shuffle(allComboDefs.filter(c => c !== correctCombo)).slice(0, 3);
+    const chosenCombos = [correctCombo, ...wrongPool].sort((a, b) => a.order - b.order);
+    const letters = ["A", "B", "C", "D"];
+    mcItem.options = chosenCombos.map((c, idx) => ({
+      label: `${letters[idx]}. ${c.text}`,
+      reqTrue: c.reqTrue,
+      reqFalse: c.reqFalse
+    }));
+    mcItem.ansIdx = chosenCombos.indexOf(correctCombo);
+  }
+
+  // ==================== 狀態管理與渲染 ====================
+  let curZone = 0;
+  let subIdx = [0, 0, 0, 0];
+  let stepPicks = [null, null, null];
+  let elimState = { 1: null, 2: null, 3: null };
+  let doneMap = {};
+  let score = 0;
+  let combo = 0;
+  let isZoom = false;
+
+  function randomizeAll() {
+    [zone0Cases, zone1Cases, zone2Cases].forEach(list => {
+      list.forEach(item => {
+        item.opts1 = shuffle(item.opts1);
+        item.opts2 = shuffle(item.opts2);
+        item.opts3 = shuffle(item.opts3);
+      });
+    });
+    redPenCases.forEach(c => { c.chips = shuffle(c.chips); });
+    elimMCs = shuffle(elimMCs);
+    elimMCs.forEach(m => prepareDynamicMC(m));
+  }
+
+  function reshuffleAll() {
+    randomizeAll();
+    stepPicks = [null, null, null];
+    elimState = { 1: null, 2: null, 3: null };
+    renderStage();
+  }
+
+  function toggleZoom() {
+    isZoom = !isZoom;
+    document.documentElement.style.setProperty('--scale', isZoom ? '1.16' : '1');
+    document.getElementById("zoomBtn").innerText = isZoom ? "🔍 大字體：開" : "🔍 大字體：關";
+  }
+
+  function updateScoreDisplay() {
+    document.getElementById("scoreBadge").innerText = `📈 積分：${score}`;
+    document.getElementById("comboBadge").innerText = `🔥 連擊：${combo}`;
+  }
+
+  function addStockScore(pts, key) {
+    combo++;
+    if (!doneMap[key]) {
+      doneMap[key] = true;
+      score += pts;
+    }
+    updateScoreDisplay();
+  }
+
+  function breakCombo() {
+    combo = 0;
+    updateScoreDisplay();
+    const st = document.getElementById("mainStage");
+    st.classList.remove("shake");
+    void st.offsetWidth;
+    st.classList.add("shake");
+  }
+
+  function switchZone(z) {
+    curZone = z;
+    for (let i = 0; i < 4; i++) {
+      document.getElementById(`zTab${i}`).className = "z-tab" + (i === z ? " active" : "");
+    }
+    stepPicks = [null, null, null];
+    elimState = { 1: null, 2: null, 3: null };
+    renderStage();
+  }
+
+  function goSub(idx) {
+    subIdx[curZone] = idx;
+    stepPicks = [null, null, null];
+    elimState = { 1: null, 2: null, 3: null };
+    renderStage();
+  }
+
+  function getZoneList(z) {
+    if (z === 0) return zone0Cases;
+    if (z === 1) return zone1Cases;
+    return zone2Cases;
+  }
+
+  function moveSub(delta, maxLen) {
+    let next = subIdx[curZone] + delta;
+    if (next >= 0 && next < maxLen) {
+      goSub(next);
+    } else if (delta > 0 && curZone < 3) {
+      switchZone(curZone + 1);
+    }
+  }
+
+  function buildDots(total, customPrefix) {
+    const prefix = customPrefix || `${curZone}`;
+    let html = "";
+    for (let i = 0; i < total; i++) {
+      const k = `${prefix}_${i}`;
+      const cls = (i === subIdx[curZone]) ? "dot-btn active" : (doneMap[k] ? "dot-btn done" : "dot-btn");
+      html += `<button class="${cls}" onclick="goSub(${i})">${i + 1}</button>`;
+    }
+    return html;
+  }
+
+  function renderStage() {
+    const stage = document.getElementById("mainStage");
+    stage.classList.remove("fade-in");
+    void stage.offsetWidth;
+    stage.classList.add("fade-in");
+
+    if (curZone < 3) renderThreeStepZone(stage);
+    else renderArenaZone(stage);
+  }
+
+  // ==================== 渲染工作區 1–3 ====================
+  function renderThreeStepZone(stage) {
+    const list = getZoneList(curZone);
+    const idx = subIdx[curZone];
+    const item = list[idx];
+
+    const scaffoldHtml = isBasicMode ? `
+      <div class="scaffold-banner">
+        <span class="scaffold-tag">🌱 導學思維引導</span>
+        ${item.guideHint}<br>
+        ✨ <strong>導學支援</strong>：每步已縮小範圍至 2 個核心對比選項，點選後會<strong>即時回饋該步分析是否正確</strong>！
+      </div>
+    ` : '';
+
+    const buildStepCol = (qTitle, optsArr, sIdx) => {
+      const visibleOpts = isBasicMode ? optsArr.filter(o => o.basicKeep) : optsArr;
+      const btns = visibleOpts.map((o) => {
+        const origIdx = optsArr.indexOf(o);
+        const isPicked = (stepPicks[sIdx] === origIdx);
+        let btnCls = "step-btn";
+        if (isPicked) {
+          btnCls += isBasicMode ? (o.ok ? " picked-ok" : " picked-err") : " picked";
+        }
+        let statusSuffix = "";
+        if (isBasicMode && isPicked) {
+          statusSuffix = o.ok ? " ✅" : " ❌";
+        }
+        return `<button class="${btnCls}" onclick="pickStep(${sIdx}, ${origIdx})">👉 ${o.text}${statusSuffix}</button>`;
+      }).join("");
+      return `
+        <div class="step-col">
+          <div class="step-q">${qTitle}</div>
+          <div class="step-opts">${btns}</div>
+        </div>
+      `;
+    };
+
+    stage.innerHTML = `
+      <div>
+        <div class="stage-header">
+          <div class="sh-title">${item.title} ${getModeBadgeHtml()}</div>
+          <div class="dots-bar">
+            <button class="helper-btn" onclick="autoSolveThreeStep()">💡 示範三步滿分分析</button>
+            ${buildDots(list.length)}
+          </div>
+        </div>
+
+        ${scaffoldHtml}
+
+        <div class="case-card">
+          <span class="cc-tag">📌 ${item.tag}</span>
+          <div class="cc-desc">${item.desc}</div>
+        </div>
+
+        ${item.tableHtml ? `<div class="mini-table-wrap">${item.tableHtml}</div>` : ''}
+
+        <div class="steps-grid">
+          ${buildStepCol(item.q1, item.opts1, 0)}
+          ${buildStepCol(item.q2, item.opts2, 1)}
+          ${buildStepCol(item.q3, item.opts3, 2)}
+        </div>
+
+        <div class="feedback-box" id="zoneFb"></div>
+      </div>
+
+      <div class="footer-bar">
+        <button class="f-nav-btn" onclick="moveSub(-1, ${list.length})" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一個案</button>
+        <button class="f-nav-btn f-primary" onclick="moveSub(1, ${list.length})">
+          ${idx === list.length - 1 ? '進入下一證券工作區 →' : '下一個案 →'}
+        </button>
+      </div>
+    `;
+
+    if (stepPicks[0] !== null && stepPicks[1] !== null && stepPicks[2] !== null) {
+      const fb = document.getElementById("zoneFb");
+      fb.style.display = "block";
+      const ok0 = item.opts1[stepPicks[0]].ok;
+      const ok1 = item.opts2[stepPicks[1]].ok;
+      const ok2 = item.opts3[stepPicks[2]].ok;
+
+      if (ok0 && ok1 && ok2) {
+        addStockScore(25, `${curZone}_${idx}`);
+        fb.className = "feedback-box fb-ok";
+        fb.innerHTML = `🏆 <strong>三步證券分析全數精準命中！（積分 +25）</strong><br>${item.exp}`;
+      } else {
+        breakCombo();
+        fb.className = "feedback-box fb-err";
+        fb.innerHTML = `⚠️ <strong>部分步驟分析有誤：</strong> 第 1 步 [${ok0 ? '✓' : '✗'}] ｜ 第 2 步 [${ok1 ? '✓' : '✗'}] ｜ 第 3 步 [${ok2 ? '✓' : '✗'}]<br>${item.exp}`;
+      }
+    }
+  }
+
+  function pickStep(sIdx, oIdx) {
+    stepPicks[sIdx] = oIdx;
+    renderThreeStepZone(document.getElementById("mainStage"));
+  }
+
+  function autoSolveThreeStep() {
+    const item = getZoneList(curZone)[subIdx[curZone]];
+    stepPicks[0] = item.opts1.findIndex(o => o.ok);
+    stepPicks[1] = item.opts2.findIndex(o => o.ok);
+    stepPicks[2] = item.opts3.findIndex(o => o.ok);
+    renderThreeStepZone(document.getElementById("mainStage"));
+  }
+
+  // ==================== 渲染工作區 4：捉錯與消去雙擂台 ====================
+  function switchMod4Sub(s) {
+    mod4Sub = s;
+    subIdx[3] = 0;
+    elimState = { 1: null, 2: null, 3: null };
+    renderArenaZone(document.getElementById("mainStage"));
+  }
+
+  function renderArenaZone(stage) {
+    const idx = subIdx[3];
+    const topSwitch = `
+      <div class="sub-mode-bar">
+        <button class="sub-mode-btn ${mod4Sub === 0 ? 'active' : ''}" onclick="switchMod4Sub(0)">🖍️ 挑戰 A：紅筆捉錯（點擊答卷錯句）</button>
+        <button class="sub-mode-btn ${mod4Sub === 1 ? 'active' : ''}" onclick="switchMod4Sub(1)">🏆 挑戰 B：組合選擇題消去法神器</button>
+      </div>
+    `;
+
+    if (mod4Sub === 0) {
+      const item = redPenCases[idx];
+      const nums = ["①", "②", "③"];
+
+      const scaffoldHtml = isBasicMode ? `
+        <div class="scaffold-banner">
+          <span class="scaffold-tag">🌱 導學審題切入點</span>
+          ${item.guideHint}（已為你精簡句子字數，方便檢視邏輯）
+        </div>
+      ` : '';
+
+      const chipsHtml = item.chips.map((ch, cIdx) => {
+        const displayTxt = isBasicMode ? ch.easyText : ch.text;
+        return `
+          <div class="sentence-chip" id="rpChip_${cIdx}" onclick="checkRedPen(${cIdx})">
+            <span>${nums[cIdx]} ${displayTxt}</span>
+            <span style="font-size:calc(13px * var(--scale)); color:var(--down-red); font-weight:900; white-space:nowrap;">🖍️ 點此捉錯</span>
+          </div>
+        `;
+      }).join("");
+
+      stage.innerHTML = `
+        <div>
+          ${topSwitch}
+          <div class="stage-header">
+            <span class="sh-title">🖍️ ${item.title} ${getModeBadgeHtml()}</span>
+            <div class="dots-bar">${buildDots(redPenCases.length, "3_rp")}</div>
+          </div>
+          ${scaffoldHtml}
+          <div class="case-card"><div class="cc-desc">${item.q}</div></div>
+          <div class="paper-sheet">
+            <div style="font-weight:900; color:var(--down-red); margin-bottom:10px; font-size:calc(14px * var(--scale));">
+              🖍️ 句子次序已隨機洗牌，請點擊藏有嚴重股票市場或恒生指數概念錯誤的那一句：
+            </div>
+            <div class="sentence-chips-wrap">${chipsHtml}</div>
+          </div>
+          <div class="feedback-box" id="rpFb"></div>
+        </div>
+        <div class="footer-bar">
+          <button class="f-nav-btn" onclick="moveSub(-1, ${redPenCases.length})" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一題</button>
+          <button class="f-nav-btn f-primary" onclick="${idx === redPenCases.length - 1 ? 'switchMod4Sub(1)' : `moveSub(1, ${redPenCases.length})`}">
+            ${idx === redPenCases.length - 1 ? '進入「挑戰 B：選擇題消去法」 →' : '下一題 →'}
+          </button>
+        </div>
+      `;
+    } else {
+      const item = elimMCs[idx];
+      const stmtsHtml = item.stmts.map(st => {
+        const curVal = elimState[st.id];
+        return `
+          <div class="elim-stmt-row">
+            <div class="elim-stmt-text">
+              ${st.text}
+              ${isBasicMode ? `<span class="elim-stmt-hint">🤔 ${st.hint}</span>` : ''}
+            </div>
+            <div class="elim-toggles">
+              <button class="elim-btn ${curVal === true ? 't-true' : ''}" onclick="toggleElim(${st.id}, true)">⭕ 正確</button>
+              <button class="elim-btn ${curVal === false ? 't-false' : ''}" onclick="toggleElim(${st.id}, false)">❌ 錯誤</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const optsHtml = item.options.map((opt, oIdx) => {
+        let isElim = false;
+        [1, 2, 3].forEach(sId => {
+          if (elimState[sId] === true && opt.reqFalse.includes(sId)) isElim = true;
+          if (elimState[sId] === false && opt.reqTrue.includes(sId)) isElim = true;
+        });
+        return `<button class="mc-card-btn ${isElim ? 'eliminated' : ''}" onclick="checkElimMc(${oIdx})">${opt.label}</button>`;
+      }).join("");
+
+      stage.innerHTML = `
+        <div>
+          ${topSwitch}
+          <div class="stage-header">
+            <span class="sh-title">🏆 ${item.title} ${getModeBadgeHtml()}</span>
+            <div class="dots-bar">${buildDots(elimMCs.length, "3_mc")}</div>
+          </div>
+          <div class="case-card"><div class="cc-desc">${item.stem}</div></div>
+          <p style="font-size:calc(14px * var(--scale)); font-weight:800; color:var(--blue); margin-bottom:8px;">
+            💡 消去法步驟：請先在右方逐句標記「⭕ 正確」或「❌ 錯誤」，下方矛盾的選項便會自動劃走！
+          </p>
+          <div>${stmtsHtml}</div>
+          <div class="mc-options-row">${optsHtml}</div>
+          <div class="feedback-box" id="elimFb"></div>
+        </div>
+        <div class="footer-bar">
+          <button class="f-nav-btn" onclick="moveSub(-1, ${elimMCs.length})" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一題</button>
+          <button class="f-nav-btn f-primary" onclick="moveSub(1, ${elimMCs.length})" ${idx === elimMCs.length - 1 ? 'style="visibility:hidden"' : ''}>下一題 →</button>
+        </div>
+      `;
+    }
+  }
+
+  function checkRedPen(cIdx) {
+    const idx = subIdx[3];
+    const item = redPenCases[idx];
+    const ch = item.chips[cIdx];
+    const nums = ["①", "②", "③"];
+    const el = document.getElementById(`rpChip_${cIdx}`);
+    const fb = document.getElementById("rpFb");
+    fb.style.display = "block";
+    if (ch.isFlaw) {
+      el.className = "sentence-chip flaw-found";
+      addStockScore(20, `3_rp_${idx}`);
+      fb.className = "feedback-box fb-ok";
+      fb.innerHTML = `<strong>🖍️ 紅筆精準捉錯（第 ${nums[cIdx]} 句得 0 分）！</strong><br>${item.exp}`;
+    } else {
+      el.className = "sentence-chip good-clicked";
+      breakCombo();
+      fb.className = "feedback-box fb-err";
+      fb.innerHTML = `⭕ <strong>第 ${nums[cIdx]} 句是完全正確的陳述！</strong> 請再檢查其餘句子找出真正的股票或恒指概念陷阱！`;
+    }
+  }
+
+  function toggleElim(sId, val) {
+    elimState[sId] = (elimState[sId] === val) ? null : val;
+    renderArenaZone(document.getElementById("mainStage"));
+  }
+
+  function checkElimMc(oIdx) {
+    const idx = subIdx[3];
+    const item = elimMCs[idx];
+    const fb = document.getElementById("elimFb");
+    fb.style.display = "block";
+    if (oIdx === item.ansIdx) {
+      addStockScore(20, `3_mc_${idx}`);
+      const breakdown = item.stmts.map(s => `• <strong>陳述 (${s.id}) ${s.isTrue ? '⭕ 正確' : '❌ 錯誤'}</strong>：${s.exp}`).join("<br>");
+      fb.className = "feedback-box fb-ok";
+      fb.innerHTML = `<strong>🏆 答對了！標準答案：${item.options[item.ansIdx].label}</strong><br>${breakdown}`;
+    } else {
+      breakCombo();
+      fb.className = "feedback-box fb-err";
+      fb.innerHTML = "❌ <strong>選項不正確！</strong> 試試先在上方逐句判斷 (1)、(2)、(3) 的對錯，利用消去法鎖定答案！";
+    }
+  }
+
+  // 初始化啟動
+  randomizeAll();
+  renderTsArea();
+  renderStage();
+</script>
+</body>
+</html>

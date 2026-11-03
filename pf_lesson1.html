@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企會財智能理財終端｜第 1 課：金錢的時間值</title>
+  <style>
+    :root {
+      --bg-dark: #070b19;
+      --sidebar-bg: #0f172a;
+      --card-bg: #ffffff;
+      --soft-bg: #f8fafc;
+      --navy: #1e293b;
+      --gold: #d97706;
+      --gold-light: #fef3c7;
+      --gold-bright: #fbbf24;
+      --cyan: #0284c7;
+      --cyan-light: #e0f2fe;
+      --emerald: #059669;
+      --emerald-light: #d1fae5;
+      --rose: #e11d48;
+      --rose-light: #ffe4e6;
+      --text: #0f172a;
+      --muted: #64748b;
+      --scale: 1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif; user-select: none; }
+    body {
+      background: radial-gradient(circle at top right, #1e1b4b, #070b19 70%);
+      color: var(--text);
+      padding: 12px;
+      font-size: calc(15.5px * var(--scale));
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeSlide 0.25s ease-out; }
+
+    /* 整體雙欄財富管理終端佈局 */
+    .terminal-shell {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 275px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .terminal-shell { grid-template-columns: 1fr; }
+    }
+
+    /* 左側導航與個人資產看板 */
+    .sidebar {
+      background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 20px;
+      padding: 20px 16px;
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      position: sticky;
+      top: 12px;
+    }
+    .brand-box {
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+    }
+    .brand-tag { font-size: calc(11.5px * var(--scale)); color: var(--gold-bright); font-weight: 900; letter-spacing: 1px; }
+    .brand-name { font-size: calc(19px * var(--scale)); font-weight: 900; margin-top: 4px; line-height: 1.3; }
+
+    /* 雙軌學習難度切換器 */
+    .diff-switcher-wrap {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 14px;
+    }
+    .diff-label { font-size: calc(11.5px * var(--scale)); color: #cbd5e1; font-weight: 800; margin-bottom: 6px; display: block; text-align: center; }
+    .diff-switcher {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: rgba(7, 11, 25, 0.8);
+      border-radius: 24px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .diff-btn {
+      border: none;
+      padding: 6px 8px;
+      border-radius: 20px;
+      font-weight: 900;
+      font-size: calc(12.5px * var(--scale));
+      cursor: pointer;
+      background: transparent;
+      color: #94a3b8;
+      transition: all 0.2s;
+    }
+    .diff-btn.active-basic {
+      background: #10b981;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.45);
+    }
+    .diff-btn.active-challenge {
+      background: #f59e0b;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45);
+    }
+
+    .wealth-meter {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .wm-label { font-size: calc(12px * var(--scale)); color: #94a3b8; font-weight: 800; }
+    .wm-val { font-size: calc(22px * var(--scale)); font-weight: 900; color: var(--gold-bright); margin: 2px 0; }
+    .wm-streak { font-size: calc(12.5px * var(--scale)); color: #34d399; font-weight: 800; }
+
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .nav-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 12px;
+      color: #cbd5e1;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateX(3px); }
+    .nav-item.active {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      border-color: var(--gold-bright);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.4);
+    }
+    .ni-icon { font-size: calc(22px * var(--scale)); }
+    .ni-title { font-size: calc(14px * var(--scale)); font-weight: 900; display: block; }
+    .ni-sub { font-size: calc(11px * var(--scale)); opacity: 0.85; display: block; }
+
+    .side-tools { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 14px; }
+    .tool-btn {
+      padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08); color: #fff; font-weight: 800; font-size: calc(13px * var(--scale));
+      cursor: pointer; transition: all 0.15s;
+    }
+    .tool-btn:hover { background: var(--gold-bright); color: #0f172a; border-color: var(--gold-bright); }
+
+    /* 右側主工作屏幕 */
+    .main-screen {
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 620px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* 頂部互動公式與時間線模擬沙盒 */
+    .sandbox-drawer {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      border: 2px solid #38bdf8;
+    }
+    .sb-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; cursor: pointer; }
+    .sb-title { font-size: calc(15.5px * var(--scale)); font-weight: 900; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+    .sb-toggle-btn { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid #38bdf8; padding: 4px 12px; border-radius: 20px; font-size: calc(12.5px * var(--scale)); font-weight: 900; cursor: pointer; }
+
+    .sb-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); }
+    .sliders-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 760px) { .sliders-grid { grid-template-columns: repeat(2, 1fr); } }
+    .slider-box { background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 10px; }
+    .sl-top { display: flex; justify-content: space-between; font-size: calc(12.5px * var(--scale)); font-weight: 800; color: #cbd5e1; margin-bottom: 6px; }
+    .sl-val { color: var(--gold-bright); font-weight: 900; }
+    input[type="range"] { width: 100%; accent-color: var(--gold-bright); cursor: pointer; }
+    .freq-pills { display: flex; gap: 4px; margin-top: 4px; }
+    .fq-btn { flex: 1; padding: 4px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.25); background: transparent; color: #cbd5e1; font-size: calc(11.5px * var(--scale)); font-weight: 800; cursor: pointer; }
+    .fq-btn.active { background: var(--gold-bright); color: #0f172a; border-color: var(--gold-bright); }
+
+    .sb-results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+    @media (max-width: 760px) { .sb-results { grid-template-columns: repeat(2, 1fr); } }
+    .res-kpi { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(255,255,255,0.15); padding: 10px; border-radius: 10px; text-align: center; }
+    .rk-label { font-size: calc(11.5px * var(--scale)); color: #94a3b8; font-weight: 800; }
+    .rk-num { font-size: calc(17px * var(--scale)); font-weight: 900; color: #34d399; margin-top: 2px; }
+
+    /* 視覺化時間線軌道 */
+    .timeline-track {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.04); border-radius: 12px; padding: 14px 16px;
+      position: relative; overflow-x: auto; gap: 8px;
+    }
+    .tl-point { text-align: center; min-width: 85px; position: relative; z-index: 2; }
+    .tl-period { font-size: calc(11.5px * var(--scale)); font-weight: 900; color: #7dd3fc; margin-bottom: 4px; }
+    .tl-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--gold-bright); margin: 0 auto 4px auto; box-shadow: 0 0 8px var(--gold-bright); }
+    .tl-amt { font-size: calc(13px * var(--scale)); font-weight: 900; color: #fff; }
+    .tl-connector { flex: 1; height: 3px; background: linear-gradient(90deg, #38bdf8, #fbbf24); min-width: 24px; position: relative; top: -2px; }
+
+    /* 關卡標題與圓點導航 */
+    .stage-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+    .sh-title { font-size: calc(18px * var(--scale)); font-weight: 900; color: var(--navy); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .mode-pill-indicator { font-size: calc(12px * var(--scale)); padding: 3px 10px; border-radius: 20px; font-weight: 900; }
+    .mp-basic { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+    .mp-challenge { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+
+    .dots-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .dot-btn {
+      width: calc(34px * var(--scale)); height: calc(34px * var(--scale));
+      border-radius: 10px; border: 2px solid #cbd5e1; background: #fff;
+      font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; color: var(--muted);
+    }
+    .dot-btn.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+    .dot-btn.done { background: var(--emerald-light); color: var(--emerald); border-color: var(--emerald); }
+
+    /* 啟發式導學引導卡（只在基礎導學模式顯示） */
+    .scaffold-banner {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid #34d399;
+      border-left: 7px solid var(--emerald);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      color: #064e3b;
+      font-size: calc(14px * var(--scale));
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .scaffold-tag {
+      display: inline-block;
+      background: var(--emerald);
+      color: #fff;
+      font-size: calc(11.5px * var(--scale));
+      font-weight: 900;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-right: 6px;
+      margin-bottom: 3px;
+    }
+
+    /* 案例情境卡片與視覺化時間軸 */
+    .case-banner {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 2px solid #fcd34d;
+      border-left: 7px solid var(--gold);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .cb-tag { font-size: calc(12px * var(--scale)); font-weight: 900; color: #b45309; text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .cb-text { font-size: calc(15.5px * var(--scale)); font-weight: 900; color: #451a03; line-height: 1.55; }
+
+    /* NPV 現金流時間軸表格 */
+    .cf-timeline-box {
+      background: #0f172a; color: #fff; border-radius: 14px; padding: 14px 18px;
+      margin-bottom: 16px; border: 2px solid #334155; overflow-x: auto;
+    }
+    .cf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; min-width: 520px; }
+    .cf-col { background: rgba(255,255,255,0.06); border-radius: 10px; padding: 10px; border: 1px solid rgba(255,255,255,0.12); }
+    .cf-yr { font-size: calc(12.5px * var(--scale)); font-weight: 900; color: #38bdf8; margin-bottom: 4px; }
+    .cf-in { font-size: calc(14px * var(--scale)); font-weight: 900; color: #4ade80; }
+    .cf-out { font-size: calc(13px * var(--scale)); font-weight: 800; color: #fb7185; }
+    .cf-scrap { font-size: calc(12.5px * var(--scale)); font-weight: 800; color: var(--gold-bright); }
+
+    /* 三步純數值與對稱決策卡 */
+    .steps-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 820px) { .steps-container { grid-template-columns: 1fr; } }
+    .step-card {
+      background: var(--soft-bg);
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sc-head { font-size: calc(13.5px * var(--scale)); font-weight: 900; color: var(--cyan); margin-bottom: 10px; min-height: 40px; }
+    .sc-opts { display: flex; flex-direction: column; gap: 7px; }
+    .sc-btn {
+      width: 100%; padding: 10px 12px; border-radius: 9px; border: 2px solid #cbd5e1;
+      background: #fff; font-weight: 900; font-size: calc(14px * var(--scale)); color: var(--text);
+      cursor: pointer; text-align: center; transition: all 0.15s;
+    }
+    .sc-btn:hover { border-color: var(--cyan); background: var(--cyan-light); }
+    .sc-btn.picked { background: #dbeafe; border-color: #2563eb; color: #1e3a8a; box-shadow: inset 0 0 0 1px #2563eb; }
+    .sc-btn.picked-ok { background: var(--emerald-light); border-color: var(--emerald); color: #064e3b; }
+    .sc-btn.picked-err { background: var(--rose-light); border-color: var(--rose); color: #881337; }
+
+    /* 方案對決比較卡（用於工作區 3 及 4） */
+    .plans-compare-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 680px) { .plans-compare-grid { grid-template-columns: 1fr; } }
+    .plan-box { background: #f8fafc; border: 2px solid #94a3b8; border-radius: 12px; padding: 12px 16px; }
+    .pb-title { font-size: calc(15px * var(--scale)); font-weight: 900; color: #1e3a8a; margin-bottom: 4px; }
+    .pb-detail { font-size: calc(14px * var(--scale)); font-weight: 800; color: #334155; }
+
+    .helper-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--gold); background: var(--gold-light); color: #92400e; font-weight: 900; font-size: calc(12.5px * var(--scale)); cursor: pointer; }
+    .helper-btn:hover { background: var(--gold); color: #fff; }
+
+    .feedback-box { margin-top: 12px; padding: 16px 18px; border-radius: 14px; font-size: calc(14.5px * var(--scale)); font-weight: 700; display: none; line-height: 1.65; }
+    .fb-ok { background: var(--emerald-light); border: 2px solid var(--emerald); color: #064e3b; }
+    .fb-err { background: var(--rose-light); border: 2px solid var(--rose); color: #881337; }
+
+    .footer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 12px; border-top: 2px solid #e2e8f0; }
+    .f-nav-btn { padding: 10px 20px; border-radius: 10px; border: 2px solid #cbd5e1; background: #fff; font-weight: 900; font-size: calc(14px * var(--scale)); cursor: pointer; color: var(--navy); }
+    .f-nav-btn:hover { background: #f1f5f9; border-color: var(--navy); }
+    .f-primary { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; border: none; }
+    .f-primary:hover { opacity: 0.92; }
+  </style>
+</head>
+<body>
+
+<div class="terminal-shell">
+  <!-- 左側：智能財富管理導航欄 -->
+  <aside class="sidebar">
+    <div class="brand-box">
+      <div class="brand-tag">💼 WEALTHTECH PLANNER</div>
+      <div class="brand-name">基礎個人理財<br>第 1 課：金錢的時間值</div>
+    </div>
+
+    <!-- 雙軌學習難度切換器（預設開啟「🔥 實戰挑戰」） -->
+    <div class="diff-switcher-wrap">
+      <span class="diff-label">🎯 學習模式切換（預設實戰）</span>
+      <div class="diff-switcher" title="切換學習模式：預設為實戰挑戰；如需思維引導與分步回饋可切換至基礎導學">
+        <button class="diff-btn" id="btnBasicMode" onclick="setDifficulty(true)">🌱 基礎導學</button>
+        <button class="diff-btn active-challenge" id="btnChallengeMode" onclick="setDifficulty(false)">🔥 實戰挑戰</button>
+      </div>
+    </div>
+
+    <div class="wealth-meter">
+      <div class="wm-label">🏆 理財策劃師專業積分</div>
+      <div class="wm-val" id="scoreDisplay">$0</div>
+      <div class="wm-streak" id="comboDisplay">🔥 精準決策連擊：0</div>
+    </div>
+
+    <div class="nav-menu">
+      <button class="nav-item active" onclick="switchZone(0)" id="zTab0">
+        <span class="ni-icon">⏳</span>
+        <div>
+          <span class="ni-title">複息與貼現時間線</span>
+          <span class="ni-sub">未來值 (FV) 與現值 (PV)</span>
+        </div>
+      </button>
+      <button class="nav-item" onclick="switchZone(1)" id="zTab1">
+        <span class="ni-icon">📊</span>
+        <div>
+          <span class="ni-title">淨現值 (NPV) 決策儀</span>
+          <span class="ni-sub">現金流貼現、殘值與反推 X</span>
+        </div>
+      </button>
+      <button class="nav-item" onclick="switchZone(2)" id="zTab2">
+        <span class="ni-icon">🏦</span>
+        <div>
+          <span class="ni-title">實際回報率 (ERR) 比較</span>
+          <span class="ni-sub">複息頻率與短期存款秒殺法</span>
+        </div>
+      </button>
+      <button class="nav-item" onclick="switchZone(3)" id="zTab3">
+        <span class="ni-icon">🎯</span>
+        <div>
+          <span class="ni-title">人生財務決策中心</span>
+          <span class="ni-sub">分期付款、通脹學費與置業</span>
+        </div>
+      </button>
+    </div>
+
+    <div class="side-tools">
+      <button class="tool-btn" onclick="reshuffleAll()">🔀 隨機洗牌所有題目與選項</button>
+      <button class="tool-btn" onclick="toggleZoom()" id="zoomBtn">🔍 投影大字體：關</button>
+    </div>
+  </aside>
+
+  <!-- 右側：互動理財決策主屏幕 -->
+  <main class="main-screen">
+    <div>
+      <!-- 頂部常駐：互動時間線與複息／ERR 動態計算機沙盒 -->
+      <div class="sandbox-drawer">
+        <div class="sb-header" onclick="toggleSandbox()">
+          <div class="sb-title">🎛️ 互動「時間線與複息頻率」即時模擬沙盒（點擊展開／收起）</div>
+          <button class="sb-toggle-btn" id="sbToggleText">收起沙盒 ▲</button>
+        </div>
+        <div class="sb-body" id="sandboxBody">
+          <div class="sliders-grid">
+            <div class="slider-box">
+              <div class="sl-top"><span>現值／本金 (PV)</span><span class="sl-val" id="sbPvVal">$10,000</span></div>
+              <input type="range" min="1000" max="100000" step="1000" value="10000" oninput="updateSandbox('pv', this.value)">
+            </div>
+            <div class="slider-box">
+              <div class="sl-top"><span>名義年利率 (i)</span><span class="sl-val" id="sbRateVal">8%</span></div>
+              <input type="range" min="2" max="16" step="1" value="8" oninput="updateSandbox('rate', this.value)">
+            </div>
+            <div class="slider-box">
+              <div class="sl-top"><span>存款年期 (年)</span><span class="sl-val" id="sbYrVal">3 年</span></div>
+              <input type="range" min="1" max="4" step="1" value="3" oninput="updateSandbox('yr', this.value)">
+            </div>
+            <div class="slider-box">
+              <div class="sl-top"><span>每年複息次數 (m)</span><span class="sl-val" id="sbFreqVal">每年 1 次</span></div>
+              <div class="freq-pills">
+                <button class="fq-btn active" id="fq1" onclick="updateSandbox('m', 1)">每年(1)</button>
+                <button class="fq-btn" id="fq2" onclick="updateSandbox('m', 2)">半年(2)</button>
+                <button class="fq-btn" id="fq4" onclick="updateSandbox('m', 4)">每季(4)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="sb-results">
+            <div class="res-kpi">
+              <div class="rk-label">總時段數目 (n) 及每期利率</div>
+              <div class="rk-num" id="sbNAndPeriod" style="color:#7dd3fc;">n = 3 期｜每期 8.00%</div>
+            </div>
+            <div class="res-kpi">
+              <div class="rk-label">單利息總額 vs 複利息總額</div>
+              <div class="rk-num" id="sbSimpleVsComp" style="color:#fcd34d;">單利 $2,400｜複利 $2,597</div>
+            </div>
+            <div class="res-kpi">
+              <div class="rk-label">期末未來值 FV = PV×(1+i/m)^n</div>
+              <div class="rk-num" id="sbFvResult">$12,597.1</div>
+            </div>
+            <div class="res-kpi">
+              <div class="rk-label">每年實際回報率 ERR = (1+i/m)^m - 1</div>
+              <div class="rk-num" id="sbErrResult">8.00%</div>
+            </div>
+          </div>
+
+          <div class="timeline-track" id="sbTimelineTrack"></div>
+        </div>
+      </div>
+
+      <!-- 動態題目舞台 -->
+      <div id="zoneStage" class="fade-in"></div>
+    </div>
+
+    <!-- 底部切換列 -->
+    <div class="footer-bar" id="footerBar"></div>
+  </main>
+</div>
+
+<script>
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function fmt(num, dec = 0) {
+    return Number(num).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  // ==================== 雙軌學習難度狀態（預設為實戰挑戰模式） ====================
+  let isBasicMode = false;
+
+  function setDifficulty(basic) {
+    isBasicMode = basic;
+    document.getElementById("btnBasicMode").className = "diff-btn" + (basic ? " active-basic" : "");
+    document.getElementById("btnChallengeMode").className = "diff-btn" + (!basic ? " active-challenge" : "");
+    renderZoneStage();
+  }
+
+  function getModeBadgeHtml() {
+    return isBasicMode
+      ? `<span class="mode-pill-indicator mp-basic">🌱 基礎導學模式（思維引導＋分步回饋）</span>`
+      : `<span class="mode-pill-indicator mp-challenge">🔥 實戰挑戰模式（標準考試難度）</span>`;
+  }
+
+  // ==================== 頂部沙盒狀態與渲染 ====================
+  let sbState = { open: true, pv: 10000, rate: 8, yr: 3, m: 1 };
+
+  function toggleSandbox() {
+    sbState.open = !sbState.open;
+    document.getElementById("sandboxBody").style.display = sbState.open ? "block" : "none";
+    document.getElementById("sbToggleText").innerText = sbState.open ? "收起沙盒 ▲" : "展開沙盒 ▼";
+  }
+
+  function updateSandbox(key, val) {
+    sbState[key] = Number(val);
+    document.getElementById("sbPvVal").innerText = `$${fmt(sbState.pv)}`;
+    document.getElementById("sbRateVal").innerText = `${sbState.rate}%`;
+    document.getElementById("sbYrVal").innerText = `${sbState.yr} 年`;
+    const mLabels = { 1: "每年 1 次", 2: "每半年 1 次", 4: "每季 1 次" };
+    document.getElementById("sbFreqVal").innerText = mLabels[sbState.m];
+    [1, 2, 4].forEach(freq => {
+      document.getElementById(`fq${freq}`).className = "fq-btn" + (sbState.m === freq ? " active" : "");
+    });
+
+    const totalN = sbState.yr * sbState.m;
+    const periodRate = (sbState.rate / 100) / sbState.m;
+    const fv = sbState.pv * Math.pow(1 + periodRate, totalN);
+    const compInt = fv - sbState.pv;
+    const simpInt = sbState.pv * (sbState.rate / 100) * sbState.yr;
+    const err = (Math.pow(1 + periodRate, sbState.m) - 1) * 100;
+
+    document.getElementById("sbNAndPeriod").innerText = `n = ${totalN} 期｜每期 ${(periodRate * 100).toFixed(2)}%`;
+    document.getElementById("sbSimpleVsComp").innerText = `單利 $${fmt(simpInt, 0)}｜複利 $${fmt(compInt, 0)}`;
+    document.getElementById("sbFvResult").innerText = `$${fmt(fv, 1)}`;
+    document.getElementById("sbErrResult").innerText = `${err.toFixed(2)}%`;
+
+    let tlHtml = "";
+    for (let y = 0; y <= sbState.yr; y++) {
+      const curVal = sbState.pv * Math.pow(1 + periodRate, y * sbState.m);
+      tlHtml += `
+        <div class="tl-point">
+          <div class="tl-period">${y === 0 ? '現在 (時段 0)' : `第 ${y} 年底 (n=${y * sbState.m})`}</div>
+          <div class="tl-dot"></div>
+          <div class="tl-amt">$${fmt(curVal, 1)}</div>
+        </div>
+      `;
+      if (y < sbState.yr) tlHtml += `<div class="tl-connector"></div>`;
+    }
+    document.getElementById("sbTimelineTrack").innerHTML = tlHtml;
+  }
+
+  // ==================== 工作區 1：複息與貼現時間線實驗室（啟發式思維引導） ====================
+  let zone0Cases = [
+    {
+      title: "時間線挑戰 1：每半年複息一次的未來值與複息金額計算",
+      tag: "複息計算（Compounding）｜跨期時段數目 n 與每期利率 i",
+      guideHint: "思維引導：① 當帳戶「每半年複息一次」時，一年內共有多少個計息時段 (n)？每半年的時段利率 (i) 應如何由名義年利率折算？ ➔ ② 六個月剛好是幾個計息時段？ ➔ ③ 特別留意第 3 步問的是「賺取多少複息」，算出一年後的連本帶利未來值 (FV) 後，還需要減去甚麼？",
+      desc: "子軒在年初第一天把 <strong>$8,000</strong> 存入銀行儲蓄帳戶，帳戶的名義年利率為 <strong>6%</strong>，<strong>每半年以複息計算利息一次</strong>。子軒打算在存放滿一年後提取全部款項。",
+      q1: "1️⃣ 在這一年存款期內，用於計算未來值的「時段數目 (n)」及「每時段利率 (i)」分別是多少？",
+      opts1: [
+        { text: "n = 1 ｜ i = 6%", ok: false, basicKeep: false },
+        { text: "n = 2 ｜ i = 3%", ok: true, basicKeep: true },
+        { text: "n = 2 ｜ i = 6%", ok: false, basicKeep: true },
+        { text: "n = 4 ｜ i = 1.5%", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 存款金額在存放「六個月（半年）後」會增加至多少（計算至整數元）？",
+      opts2: [
+        { text: "$8,120", ok: false, basicKeep: false },
+        { text: "$8,240", ok: true, basicKeep: true },
+        { text: "$8,480", ok: false, basicKeep: true },
+        { text: "$8,487", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 如果子軒在「一年後」提取全部存款，他在這一年內共可賺取多少「複息」（計算至整數元）？",
+      opts3: [
+        { text: "$480", ok: false, basicKeep: true },
+        { text: "$487", ok: true, basicKeep: true },
+        { text: "$960", ok: false, basicKeep: false },
+        { text: "$8,487", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. 年利率 6% 每半年複息一次，代表每半年（一個時段）的利率 $i = 6\\% \\div 2 = 3\\%$；存放一年共有 $n = 2$ 個半年時段。<br>2. **六個月後的存款額** $= \\$8,000 \\times (1 + 3\\%)^1 = \\mathbf{\\$8,240}$。<br>3. **一年後的未來值（連本帶利）** $= \\$8,000 \\times (1 + 3\\%)^2 = \\$8,487.2$；扣除本金 $\\$8,000$ 後，**賺取的複息金額** $= \\mathbf{\\$487}$（切勿把連本帶利總額當作利息金額）！"
+    },
+    {
+      title: "時間線挑戰 2：運用貼現計算求取達成目標所需的現值（PV）",
+      tag: "貼現計算（Discounting）｜由未來目標金額反推現時應存入本金",
+      guideHint: "思維引導：① 已知「未來某時點的目標金額 (FV)」，要反推「今天應存入的本金 (PV)」，在時間線上是向前折算（貼現），應乘以還是除以 $(1+i)^n$？ ➔ ② 分別代入陳先生（3 年、5%）及思敏（2 年、4%）的年期與利率進行貼現。",
+      desc: "陳先生打算開立一個儲蓄帳戶，銀行提供的年利率為 <strong>5%</strong>，每年以複息計算利息。陳先生希望在 <strong>3 年後</strong>從這個帳戶收回 <strong>$250,000</strong> 作為開業資金。另一方面，攝影師思敏亦計劃在 <strong>2 年後</strong>購買一部價值 <strong>$15,000</strong> 的專業相機（假設存款年利率為 <strong>4%</strong>，每年複息）。",
+      q1: "1️⃣ 要從未來的一筆目標款項計算出現在須投入的「現值 (PV)」，應採用甚麼計算方法及公式？",
+      opts1: [
+        { text: "貼現計算：PV = FV ÷ (1 + i)^n", ok: true, basicKeep: true },
+        { text: "複息計算：PV = FV × (1 + i)^n", ok: false, basicKeep: true },
+        { text: "貼現計算：PV = FV ÷ (1 + n)^i", ok: false, basicKeep: false },
+        { text: "單息計算：PV = FV - (FV × i × n)", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 陳先生現在應把多少錢存入儲蓄帳戶，才可在 3 年後收回 $250,000（計算至整數元）？",
+      opts2: [
+        { text: "$212,500", ok: false, basicKeep: true },
+        { text: "$215,959", ok: true, basicKeep: true },
+        { text: "$226,757", ok: false, basicKeep: false },
+        { text: "$289,406", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 思敏現在要把多少錢存入銀行，才可在 2 年後達成購買 $15,000 專業相機的目標（計算至整數元）？",
+      opts3: [
+        { text: "$13,800", ok: false, basicKeep: true },
+        { text: "$13,868", ok: true, basicKeep: true },
+        { text: "$14,423", ok: false, basicKeep: false },
+        { text: "$16,224", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. 從未來值（$FV$）求現值（$PV$）的方法稱為**貼現計算**，公式為 $PV = \\frac{FV}{(1+i)^n}$。<br>2. **陳先生現在應存入的現值** $= \\frac{\\$250,000}{(1 + 5\\%)^3} = \\mathbf{\\$215,959}$。<br>3. **思敏現在應存入的現值** $= \\frac{\\$15,000}{(1 + 4\\%)^2} = \\mathbf{\\$13,868}$！"
+    },
+    {
+      title: "時間線挑戰 3：由已知「賺取的複息金額」逆推三年前本金及再投資未來值",
+      tag: "逆向貼現與再投資｜區分「複息金額」與「未來值總額」",
+      guideHint: "思維引導：① 題目給出的 $1,910.2 是「3 年內賺取的複息」而非本利和！試思考每 $1 本金在 3 年後（年息 6%）可產生多少元複息［即 $(1+6\\%)^3 - 1$］？ ➔ ② 用實際賺取的複息除以該複息因子即可反推本金 $P$ ➔ ③ 再投資時，記得把「本金＋已賺利息」全數代入未來 2 年的複息公式。",
+      desc: "雅婷在 <strong>3 年前</strong>把一筆本金（$P$）存入銀行帳戶，年利率為 <strong>6%</strong>，每年以複息計算利息。今天（3 年期滿），雅婷從該帳戶共賺取了 <strong>$1,910.2 的複息</strong>。隨後，雅婷把今天取回的<strong>存款總額（包括本金和利息）</strong>全數再投資在另一個為期 <strong>2 年</strong>、年利率 <strong>5%</strong>（每年複息）的儲蓄計劃上。",
+      q1: "1️⃣ 在首 3 年年利率 6%（每年複息）下，每 $1 本金在 3 年後累積的複息因子 [(1 + 6%)^3 - 1] 約為多少？",
+      opts1: [
+        { text: "0.1800（即 18.00%）", ok: false, basicKeep: true },
+        { text: "0.1910（即 19.10%）", ok: true, basicKeep: true },
+        { text: "1.1800（即 118.00%）", ok: false, basicKeep: false },
+        { text: "1.1910（即 119.10%）", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 根據雅婷賺取的複息 $1,910.2，反推她在「3 年前存入的本金」是多少（計算至整數元）？",
+      opts2: [
+        { text: "$8,000", ok: false, basicKeep: false },
+        { text: "$10,000", ok: true, basicKeep: true },
+        { text: "$10,612", ok: false, basicKeep: true },
+        { text: "$11,910", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 雅婷把本利和（本金＋$1,910.2）再投資 2 年（年利率 5% 每年複息）後，最終的「未來值」是多少（計算至整數元）？",
+      opts3: [
+        { text: "$13,101", ok: false, basicKeep: true },
+        { text: "$13,131", ok: true, basicKeep: true },
+        { text: "$13,382", ok: false, basicKeep: false },
+        { text: "$13,788", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. 設三年前存入的本金為 $P$。三年後的未來值為 $P \\times (1 + 6\\%)^3$，而**賺取的複息** $= P \\times [(1 + 6\\%)^3 - 1] = \\$1,910.2$。由於 $(1.06)^3 - 1 = 0.191016$，故 **$P = \\frac{\\$1,910.2}{0.191016} = \\mathbf{\\$10,000}$**！<br>2. 今天取回的存款總額（本金＋利息）$= \\$10,000 + \\$1,910.2 = \\$11,910.2$。<br>3. 再投資兩年後的**未來值** $= \\$11,910.2 \\times (1 + 5\\%)^2 = \\$13,130.99 \\approx \\mathbf{\\$13,131}$！"
+    },
+    {
+      title: "時間線挑戰 4：求取達成目標未來值所需的最少存款年期與時間值概念辨析",
+      tag: "時段數目 (n) 推算與現值／未來值概念辨析",
+      guideHint: "思維引導：① 試以複息公式計算 $4,000 在存放 2 年及 3 年後的未來值（注意不可用單息計算！），觀察哪一年底首次達到或超過 $5,000 ➔ ② 在時間線上，起點投入的金額與終點累積的金額分別稱為甚麼？",
+      desc: "志豪把 <strong>$4,000</strong> 存入銀行帳戶，帳戶的年利率為 <strong>8%</strong>，每年以複息計算利息。志豪希望獲得<strong>不少於 $5,000 的未來值</strong>。此外，黃女士在兩年前將 <strong>$2,500</strong> 存入另一帳戶，現時該帳戶的存款額已升至 <strong>$2,916</strong>。",
+      q1: "1️⃣ 志豪的 $4,000 存款在存放「2 年後」及「3 年後」的未來值分別是多少（計算至整數元）？",
+      opts1: [
+        { text: "2 年後：$4,640 ｜ 3 年後：$4,960", ok: false, basicKeep: true },
+        { text: "2 年後：$4,666 ｜ 3 年後：$5,039", ok: true, basicKeep: true },
+        { text: "2 年後：$4,800 ｜ 3 年後：$5,200", ok: false, basicKeep: false },
+        { text: "2 年後：$5,000 ｜ 3 年後：$5,400", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 如果志豪想獲得不少於 $5,000 的未來值，他至少要把款項存入銀行多少整年？",
+      opts2: [
+        { text: "1 年", ok: false, basicKeep: false },
+        { text: "2 年", ok: false, basicKeep: true },
+        { text: "3 年", ok: true, basicKeep: true },
+        { text: "4 年", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 在黃女士的個案中（兩年前存入 $2,500，現時升至 $2,916），以兩年前為起點，下列哪項概念描述是正確的？",
+      opts3: [
+        { text: "$2,500 是現值（PV），而 $2,916 則是該筆款項在兩年後的未來值（FV）", ok: true, basicKeep: true },
+        { text: "$2,916 是現值（PV），而 $2,500 則是該筆款項在兩年前的未來值（FV）", ok: false, basicKeep: true },
+        { text: "透過貼現計算可由 $2,500 算出 $2,916，而透過複息計算可由 $2,916 算出 $2,500", ok: false, basicKeep: false },
+        { text: "今天收到的一元比兩年後收到的一元價值較低，因為未來的金額數字較大", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. 存放 2 年後的 $FV = \\$4,000 \\times (1.08)^2 = \\$4,665.6$（少於 $\\$5,000$）；存放 3 年後的 $FV = \\$4,000 \\times (1.08)^3 = \\$5,038.85$（不少於 $\\$5,000$），因此志豪至少要存入 **3 年**。<br>2. 在黃女士的例子中，兩年前投入的 $\\$2,500$ 是起點的現值（$PV$），而經過兩年複息增長後的 $\\$2,916$ 則是該時段完結時的未來值（$FV$）！"
+    }
+  ];
+
+  // ==================== 工作區 2：淨現值（NPV）現金流引擎（啟發式思維引導） ====================
+  let zone1Cases = [
+    {
+      title: "NPV 實戰 1：含「每年保養費流出」與「期末殘值」的商業設備選購決策",
+      tag: "淨現金流入計算 ＋ 殘值貼現 ＋ 互斥項目比較",
+      guideHint: "思維引導：① 貼現前須先求每年的「淨現金流入」——首兩年須從現金流入中減去保養費流出，而第 3 年底則須加上賣出殘值！ ➔ ② 將三年的淨現金流入分別按 $(1+10\\%)^1$、$(1+10\\%)^2$、$(1+10\\%)^3$ 貼現，加總後再減去最初售價 ➔ ③ 當只可從兩個項目中選購一台時，應比較哪個指標？",
+      desc: "張小姐想為她的烘焙店添置一台商用智能焗爐，正考慮甲、乙兩個型號（資本成本為每年 <strong>10%</strong>）。兩台焗爐均<strong>可使用 3 年</strong>，在<strong>第 3 年年底均可按 $2,000 賣出（剩餘價值／殘值）</strong>，且在<strong>首兩年年底均須支付每年 $800 的定期保養費</strong>。已知甲型號（售價 $15,000）的淨現值為 <strong>$685.2</strong>；以下為<strong>乙型號（最初售價 $18,000）</strong>的現金流資料：",
+      cfTable: [
+        { yr: "時段 0（現在）", inTxt: "—", outTxt: "最初支出 -$18,000", scrapTxt: "—" },
+        { yr: "第 1 年年底", inTxt: "流入 +$8,800", outTxt: "保養費 -$800", scrapTxt: "—" },
+        { yr: "第 2 年年底", inTxt: "流入 +$7,800", outTxt: "保養費 -$800", scrapTxt: "—" },
+        { yr: "第 3 年年底", inTxt: "流入 +$6,000", outTxt: "保養費 $0", scrapTxt: "賣出殘值 +$2,000" }
+      ],
+      q1: "1️⃣ 乙型號在第 1 年底、第 2 年底及第 3 年底（連同賣出殘值）的「淨現金流入」分別是多少？",
+      opts1: [
+        { text: "第1年：$8,800 ｜ 第2年：$7,800 ｜ 第3年：$6,000", ok: false, basicKeep: false },
+        { text: "第1年：$8,000 ｜ 第2年：$7,000 ｜ 第3年：$8,000", ok: true, basicKeep: true },
+        { text: "第1年：$8,000 ｜ 第2年：$7,000 ｜ 第3年：$6,000", ok: false, basicKeep: true },
+        { text: "第1年：$9,600 ｜ 第2年：$8,600 ｜ 第3年：$8,000", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 按資本成本 10% 貼現後，乙型號智能焗爐的「淨現值 (NPV)」是多少（計算至一個小數位）？",
+      opts2: [
+        { text: "$557.5", ok: false, basicKeep: true },
+        { text: "$685.2", ok: false, basicKeep: false },
+        { text: "$1,068.4", ok: true, basicKeep: true },
+        { text: "$5,000.0", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 張小姐只會為烘焙店購買一台智能焗爐，她應如何作出決定？",
+      opts3: [
+        { text: "選擇購買乙型號，因為兩個型號的 NPV 均大於零，而乙型號的 NPV ($1,068.4) 高於甲型號 ($685.2)", ok: true, basicKeep: true },
+        { text: "選擇購買甲型號，因為甲型號的最初售價 ($15,000) 比乙型號 ($18,000) 便宜 $3,000", ok: false, basicKeep: true },
+        { text: "同時購買甲型號和乙型號兩台焗爐，因為兩者的 NPV 均為正數", ok: false, basicKeep: false },
+        { text: "兩個型號都不購買，因為兩者的回報率均低於資本成本 10%", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. 進行貼現前須先求每年的**淨現金流入**（現金流入 － 現金流出）：第 1 年 $= \\$8,800 - \\$800 = \\$8,000$；第 2 年 $= \\$7,800 - \\$800 = \\$7,000$；第 3 年（連同賣出殘值）$= \\$6,000 + \\$2,000 = \\$8,000$。<br>2. **乙型號 NPV** $= \\frac{\\$8,000}{1.1} + \\frac{\\$7,000}{1.1^2} + \\frac{\\$8,000}{1.1^3} - \\$18,000 = \\$7,272.73 + \\$5,785.12 + \\$6,010.52 - \\$18,000 = \\mathbf{\\$1,068.4}$。<br>3. 從兩個互斥項目中選擇其一時，應選擇**淨現值最高**的乙型號！"
+    },
+    {
+      title: "NPV 實戰 2：已知「NPV 趨近於零（或決定採納）」反推第 3 年未知現金流 X",
+      tag: "高階逆推計算｜利用 NPV ≥ 0 條件求取未知現金流 X",
+      guideHint: "思維引導：① 當一個項目的「淨現值 (NPV) 等於零」時，代表未來三年現金流入的「總現值」剛好等於「初始成本」！ ➔ ② 先從初始成本減去首兩年現金流入的現值總和，得出第 3 年現金流所需的「現值」，再乘以 $(1+i)^3$ 還原為第 3 年底的未來金額（項目 B 記得最後減去第 3 年底已有的殘值 $1,000）。",
+      desc: "以下有兩個獨立投資評估個案：<br>• <strong>項目 A</strong>：初始成本為 <strong>$20,000</strong>，貼現率為 <strong>8%</strong>，投資期 3 年（無殘值）。第 1 及第 2 年年終均帶來淨現金流入 <strong>$8,000</strong>，求令該項目<strong>淨現值趨近於零</strong>的第 3 年年終淨現金流入。<br>• <strong>項目 B</strong>：設計公司決定購買一套成本 <strong>$50,000</strong> 的激光雕刻系統（可使用 3 年，第 3 年底可按 <strong>$1,000</strong> 賣出，資本成本為 <strong>5%</strong>）。系統在未來三年底分別帶來 <strong>$22,000</strong>、<strong>$18,000</strong> 和 <strong>X</strong> 的現金流入，求公司決定購買該系統時 <strong>X 的最小值</strong>。",
+      cfTable: [
+        { yr: "時段 0（初始成本）", inTxt: "項目A：-$20,000", outTxt: "項目B：-$50,000", scrapTxt: "—" },
+        { yr: "第 1 年年底", inTxt: "項目A：+$8,000", outTxt: "項目B：+$22,000", scrapTxt: "—" },
+        { yr: "第 2 年年底", inTxt: "項目A：+$8,000", outTxt: "項目B：+$18,000", scrapTxt: "—" },
+        { yr: "第 3 年年底", inTxt: "項目A：? (NPV=0)", outTxt: "項目B：+X", scrapTxt: "項目B殘值：+$1,000" }
+      ],
+      q1: "1️⃣ 在「項目 A（貼現率 8%）」中，首兩年淨現金流入（每年 $8,000）的現值總和是多少（計算至整數元）？",
+      opts1: [
+        { text: "$14,266", ok: true, basicKeep: true },
+        { text: "$14,815", ok: false, basicKeep: true },
+        { text: "$15,200", ok: false, basicKeep: false },
+        { text: "$16,000", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 在「項目 A」中，如果第 3 年年終的淨現金流入是多少，該項目的淨現值會趨近於零（計算至整數元）？",
+      opts2: [
+        { text: "$5,734", ok: false, basicKeep: true },
+        { text: "$6,689", ok: false, basicKeep: false },
+        { text: "$7,223", ok: true, basicKeep: true },
+        { text: "$8,640", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 在「項目 B（貼現率 5%，第 3 年底另有殘值 $1,000）」中，公司決定購買系統代表 NPV ≥ 0，則 X 的最小值是多少（計算至整數元）？",
+      opts3: [
+        { text: "$13,803", ok: true, basicKeep: true },
+        { text: "$14,803", ok: false, basicKeep: true },
+        { text: "$15,293", ok: false, basicKeep: false },
+        { text: "$16,120", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **項目 A 首兩年現值總和** $= \\frac{\\$8,000}{1.08} + \\frac{\\$8,000}{1.08^2} = \\$7,407.41 + \\$6,858.71 = \\mathbf{\\$14,266.12}$。<br>2. 要令項目 A 的 $NPV = 0$，第 3 年現金流的現值須等於 $\\$20,000 - \\$14,266.12 = \\$5,733.88$；乘回 $(1.08)^3$ 得出**第 3 年現金流** $= \\$5,733.88 \\times 1.259712 = \\mathbf{\\$7,223}$！<br>3. **項目 B 求 X 最小值（即令 NPV = 0）**：首兩年現值 $= \\frac{\\$22,000}{1.05} + \\frac{\\$18,000}{1.05^2} = \\$20,952.38 + \\$16,326.53 = \\$37,278.91$。第 3 年總流入（$X + \\$1,000$）的現值須等於 $\\$50,000 - \\$37,278.91 = \\$12,721.09$。故 $X + \\$1,000 = \\$12,721.09 \\times (1.05)^3 = \\$14,802.58$，減去殘值 $\\$1,000$ 得出 **$X = \\mathbf{\\$13,803}$**！"
+    },
+    {
+      title: "NPV 實戰 3：由已知 NPV 反推設備最初成本 ＆ 供應商加價後的採納決策",
+      tag: "反推初始成本 (I) ＋ 價格變動敏感度分析 ＋ 多項目採納準則",
+      guideHint: "思維引導：① 根據定義 $NPV = \\text{未來淨現金流入總現值} - \\text{最初成本}$，先算出三年每年 $9,000 的總現值，再減去原 NPV ($4,057) 即可求出原定最初成本 ➔ ② 將原定成本乘以 $(1+15\\%)$ 後，觀察新的 NPV 是否仍然大於零 ➔ ③ 思考當一個項目的 $NPV = 0$ 時，代表其回報率剛好等於資本成本，應否接納？",
+      desc: "方先生打算為工作室購買一台可使用 <strong>3 年</strong>的工業級 3D 打印機（無剩餘價值），預計未來三年每年年底可帶來 <strong>$9,000</strong> 的淨現金流入，工作室的資本成本為每年 <strong>6%</strong>。已知在原定售價下，該打印機的<strong>淨現值為 $4,057</strong>。後來，供應商突然將該打印機的<strong>原定售價提高 15%</strong>。",
+      cfTable: [
+        { yr: "時段 0（最初成本 I）", inTxt: "原定成本 = ?", outTxt: "加價後 = 原成本 × 1.15", scrapTxt: "原 NPV = +$4,057" },
+        { yr: "第 1 年年底", inTxt: "淨流入 +$9,000", outTxt: "貼現率 6%", scrapTxt: "—" },
+        { yr: "第 2 年年底", inTxt: "淨流入 +$9,000", outTxt: "貼現率 6%", scrapTxt: "—" },
+        { yr: "第 3 年年底", inTxt: "淨流入 +$9,000", outTxt: "貼現率 6%", scrapTxt: "殘值 $0" }
+      ],
+      q1: "1️⃣ 該打印機在未來三年每年年底帶來的 $9,000 淨現金流入，按 6% 貼現後的「總現值」及「打印機原定最初成本」分別是多少（計算至整數元）？",
+      opts1: [
+        { text: "總現值：$24,057 ｜ 原定最初成本：$20,000", ok: true, basicKeep: true },
+        { text: "總現值：$27,000 ｜ 原定最初成本：$22,943", ok: false, basicKeep: true },
+        { text: "總現值：$24,057 ｜ 原定最初成本：$28,114", ok: false, basicKeep: false },
+        { text: "總現值：$25,472 ｜ 原定最初成本：$21,415", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 當供應商將打印機售價提高 15%（即新售價為 $23,000）後，打印機「新的淨現值」是多少？方先生應否購買？",
+      opts2: [
+        { text: "新淨現值為 +$1,057；由於 NPV 仍大於零，方先生應該購買該打印機", ok: true, basicKeep: true },
+        { text: "新淨現值為 -$3,000；由於加價令成本上升，方先生不應購買該打印機", ok: false, basicKeep: true },
+        { text: "新淨現值為 +$3,448；由於 NPV 大於零，方先生應該購買該打印機", ok: false, basicKeep: false },
+        { text: "新淨現值為 $0；方先生購買與否沒有分別", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 另有一家宏達公司面對三個獨立項目：項目一（成本 $60,000，未來淨流入現值 $75,000）、項目二（成本 $80,000，未來淨流入現值 $80,000）、項目三（成本 $45,000，未來淨流入現值 $52,000）。若公司資金充裕可選擇多於一個項目，應接納哪些項目？",
+      opts3: [
+        { text: "接納項目一、項目二和項目三（因為所有淨現值大於或等於零的項目均值得接納）", ok: true, basicKeep: true },
+        { text: "只接納項目一和項目三（因為項目二的淨現值等於零，沒有任何投資回報）", ok: false, basicKeep: true },
+        { text: "只接納項目一（因為項目一的淨現值 +$15,000 在三個項目中最高）", ok: false, basicKeep: false },
+        { text: "只接納項目二（因為項目二的最初投資規模 $80,000 最大）", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **三年現金流入總現值** $= \\frac{\\$9,000}{1.06} + \\frac{\\$9,000}{1.06^2} + \\frac{\\$9,000}{1.06^3} = \\$24,057.11 \\approx \\$24,057$。因為 $NPV (\\$4,057) = \\text{總現值 } (\\$24,057) - \\text{原成本 } I$，故**原定最初成本 $I = \\mathbf{\\$20,000}$**！<br>2. 售價提高 15% 後，新成本 $= \\$20,000 \\times 1.15 = \\$23,000$；**新 NPV** $= \\$24,057 - \\$23,000 = \\mathbf{+\\$1,057} > 0$，財務利益仍大於成本，故**應該購買**！<br>3. **多項目採納準則**：當可接納多於一個項目時，應接納所有 **$NPV \\ge 0$** 的項目（當 $NPV = 0$ 時，代表項目回報率剛好等同所需回報率／資本成本，同樣應予採納）！"
+    }
+  ];
+
+  // ==================== 工作區 3：實際回報率（ERR）與短期存款秒殺器（啟發式思維引導） ====================
+  let zone2Cases = [
+    {
+      title: "ERR 實戰 1：計算每年實際回報率（ERR）並排序比較",
+      tag: "名義回報率 (i) vs 實際回報率 (ERR) ｜ 不同複息頻率比較",
+      guideHint: "思維引導：① 運用公式 $ERR = (1 + \\frac{i}{m})^m - 1$，先確認每個帳戶每年計算複息的次數 $m$（每半年一次即 $m=2$；每季一次即 $m=4$） ➔ ② 當每年只複息一次 ($m=1$) 時，實際回報率與名義回報率有何關係？",
+      desc: "投資者正比較以下三家銀行提供的儲蓄帳戶之真實回報表現：",
+      plans: [
+        { name: "🏦 星輝銀行帳戶", detail: "名義回報率為每年 8.2%，每年以複息計算利息兩次（每半年一次）" },
+        { name: "🏦 恒豐銀行帳戶", detail: "名義回報率為每年 8.3%，每年以複息計算利息一次" },
+        { name: "🏦 大華銀行帳戶", detail: "名義回報率為每年 8.0%，每季以複息計算利息一次（每年四次）" },
+        { name: "📐 核心公式", detail: "每年實際回報率 ERR = (1 + i / m)^m - 1" }
+      ],
+      q1: "1️⃣ 「星輝銀行帳戶（年利率 8.2%，每半年複息一次）」的每年實際回報率（ERR）是多少（計算至兩個小數位）？",
+      opts1: [
+        { text: "8.20%", ok: false, basicKeep: true },
+        { text: "8.37%", ok: true, basicKeep: true },
+        { text: "8.45%", ok: false, basicKeep: false },
+        { text: "8.52%", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 「大華銀行帳戶（年利率 8.0%，每季複息一次）」的每年實際回報率（ERR）是多少（計算至兩個小數位）？",
+      opts2: [
+        { text: "8.00%", ok: false, basicKeep: false },
+        { text: "8.16%", ok: false, basicKeep: true },
+        { text: "8.24%", ok: true, basicKeep: true },
+        { text: "8.32%", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 把星輝、恒豐、大華三個帳戶的「實際回報率」由高至低排列，正確次序是甚麼？",
+      opts3: [
+        { text: "星輝 (8.37%) ＞ 恒豐 (8.30%) ＞ 大華 (8.24%)", ok: true, basicKeep: true },
+        { text: "恒豐 (8.30%) ＞ 星輝 (8.20%) ＞ 大華 (8.00%)", ok: false, basicKeep: true },
+        { text: "恒豐 (8.30%) ＞ 大華 (8.24%) ＞ 星輝 (8.16%)", ok: false, basicKeep: false },
+        { text: "大華 (8.24%) ＞ 星輝 (8.37%) ＞ 恒豐 (8.30%)", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **星輝銀行 ERR** $= (1 + \\frac{8.2\\%}{2})^2 - 1 = (1.041)^2 - 1 = \\mathbf{8.37\\%}$。<br>2. **恒豐銀行 ERR**：因每年只複息一次（$m=1$），故實際回報率等於名義回報率 $= \\mathbf{8.30\\%}$。<br>3. **大華銀行 ERR** $= (1 + \\frac{8.0\\%}{4})^4 - 1 = (1.02)^4 - 1 = \\mathbf{8.24\\%}$。<br>4. 由高至低排列為：**星輝 (8.37%) ＞ 恒豐 (8.30%) ＞ 大華 (8.24%)**！"
+    },
+    {
+      title: "ERR 實戰 2：存款期少於一年（半年期）的快速篩選秒殺法",
+      tag: "短期存款防伏秘訣｜複息計算期 vs 實際存款期",
+      guideHint: "思維引導：① 請先比較「複息計算周期」與「實際存款期（半年）」——如果一個計劃規定「滿一年才計算並派發一次複息」，存戶在半年後提款能否獲發利息？ ➔ ② 在餘下可獲發利息的計劃中，計算半年（2 個季度 vs 1 個半年）後的本利和。",
+      desc: "請解決以下兩個「半年期（6 個月）」短期存款問題：<br>• <strong>問題 A</strong>：林先生擬把現金 <strong>$300,000</strong> 存入銀行，<strong>為期半年</strong>。銀行提供四個計劃：(A) 半年後總利息為 $5,400；(B) 每季計算複利息，年利率為 3.6%；(C) 每半年計算複利息，年利率為 3.6%；(D) 每年計算複利息，年利率為 3.6%。<br>• <strong>問題 B</strong>：嘉敏想投資 <strong>$80,000</strong> 在儲蓄計劃上，並在<strong>半年後取回多於 $82,400</strong>（即半年回報須多於 3%）。共有三個計劃：(1) 計劃一：年利率 6%，每季以複息計算；(2) 計劃二：年利率 6.4%，每半年以複息計算；(3) 計劃三：年利率 7.5%，每年以複息計算。",
+      plans: [
+        { name: "⚡ 審題關鍵第 1 步", detail: "先檢視各計劃的「複息計算周期」是否長於「存款期（半年）」！" },
+        { name: "⚡ 審題關鍵第 2 步", detail: "當兩個選項有相同名義年利率時，比較半年內的複息次數（每季複息 2 次 vs 每半年複息 1 次）！" }
+      ],
+      q1: "1️⃣ 在問題 A 及問題 B 中，為何「每年計算複利息一次」的計劃（即使年利率高達 7.5%）在半年後取回的利息是 $0？",
+      opts1: [
+        { text: "因為複息計算期（1 年）比存款期（半年）長，在半年期滿提款時尚未到達首次計算及派發利息的時點，故不會產生任何利息", ok: true, basicKeep: true },
+        { text: "因為銀行條例禁止向每年計算複息一次的短期存戶退還本金", ok: false, basicKeep: false },
+        { text: "因為每年計算複息一次的計劃在半年後提取時，必須倒扣本金 5% 作為行政費", ok: false, basicKeep: false },
+        { text: "因為每年複息一次的實際回報率低於名義回報率", ok: false, basicKeep: true }
+      ],
+      q2: "2️⃣ 在「問題 A（林先生存入 $300,000 為期半年）」中，哪個儲蓄計劃提供的回報最高（連同其半年總利息）？",
+      opts2: [
+        { text: "計劃 B（每季複息，年利率 3.6%）最高，半年總利息為 $5,424.3", ok: true, basicKeep: true },
+        { text: "計劃 A（半年後總利息為 $5,400）最高，因為金額固定", ok: false, basicKeep: false },
+        { text: "計劃 C（每半年複息，年利率 3.6%）最高，半年總利息為 $5,400", ok: false, basicKeep: true },
+        { text: "計劃 D（每年複息，年利率 3.6%）最高，半年總利息為 $10,800", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 在「問題 B（嘉敏投資 $80,000 半年後欲取回多於 $82,400）」中，哪些計劃符合她的要求？",
+      opts3: [
+        { text: "只有 (1) 計劃一［半年取回 $82,418］及 (2) 計劃二［半年取回 $82,560］", ok: true, basicKeep: true },
+        { text: "只有 (2) 計劃二［半年取回 $82,560］", ok: false, basicKeep: false },
+        { text: "只有 (1) 計劃一 及 (3) 計劃三", ok: false, basicKeep: false },
+        { text: "(1) 計劃一、(2) 計劃二 及 (3) 計劃三 全部符合", ok: false, basicKeep: true }
+      ],
+      exp: "【核心概念拆解】<br>1. **短期存款頭號陷阱**：存款期只有**半年**，凡「每年計算複息一次」的計劃（問題 A 的 D 及問題 B 的計劃三），因複息計算期（1 年）比存款期（半年）長，在半年後不會產生任何利息！<br>2. **問題 A（林先生）**：剔除 D 後，B 與 C 同為年利率 3.6%，但 B（每季複息，半年內複息 2 次，每季利率 $0.9\\%$）頻率高於 C（每半年複息 1 次，利率 $1.8\\%$，利息剛好 $\\$5,400$）。B 的半年利息 $= \\$300,000 \\times (1.009)^2 - \\$300,000 = \\mathbf{\\$5,424.3} > \\$5,400$，故 **B 最高**！<br>3. **問題 B（嘉敏）**：計劃一半年後未來值 $= \\$80,000 \\times (1 + \\frac{6\\%}{4})^2 = \\mathbf{\\$82,418} > \\$82,400$（符合）；計劃二半年後未來值 $= \\$80,000 \\times (1 + \\frac{6.4\\%}{2})^1 = \\mathbf{\\$82,560} > \\$82,400$（符合）；計劃三因每年複息一次，半年未到派息期只得本金 $\\$80,000$（不符）！"
+    },
+    {
+      title: "ERR 實戰 3：不作額外計算直接比較 ERR ＆ 名義與實際回報率關係",
+      tag: "邏輯推論分析｜利用半年期未來值大小直接推論全年 ERR 高低",
+      guideHint: "思維引導：① 先計算兩個計劃在「半年後」的未來值（計劃甲為 1 個半年期；計劃乙為 2 個季度期） ➔ ② 思考：在投入相同本金及相同半年期下，半年後未來值較高的一方，其全年的實際回報率 (ERR) 會較高還是較低？ ➔ ③ 檢視 ERR 公式中是否包含本金 $P$ 這一變數？",
+      desc: "芷晴想把 <strong>$20,000</strong> 用作投資，<strong>為期半年</strong>。銀行向她推介兩個儲蓄計劃：<br>• <strong>計劃甲</strong>：年利率為 <strong>5%</strong>，每年以複息計算利息兩次（每半年一次）<br>• <strong>計劃乙</strong>：年利率為 <strong>4.8%</strong>，每季以複息計算利息一次（每年四次）",
+      plans: [
+        { name: "📘 計劃甲（年利率 5%，每半年複息）", detail: "半年共有 n = 1 期，每半年利率 = 5% ÷ 2 = 2.5%" },
+        { name: "📗 計劃乙（年利率 4.8%，每季複息）", detail: "半年共有 n = 2 期（兩季），每季利率 = 4.8% ÷ 4 = 1.2%" }
+      ],
+      q1: "1️⃣ 計劃甲與計劃乙在「半年後」的未來值（FV）分別是多少（計算至一個小數位）？",
+      opts1: [
+        { text: "計劃甲：$20,500.0 ｜ 計劃乙：$20,482.9", ok: true, basicKeep: true },
+        { text: "計劃甲：$21,000.0 ｜ 計劃乙：$20,960.0", ok: false, basicKeep: false },
+        { text: "計劃甲：$20,482.9 ｜ 計劃乙：$20,500.0", ok: false, basicKeep: true },
+        { text: "計劃甲：$20,506.3 ｜ 計劃乙：$20,480.0", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 承上題，在「不作額外計算」的情況下，如何解釋哪個計劃的「每年實際回報率 (ERR)」較高？",
+      opts2: [
+        { text: "計劃甲的 ERR 較高；因為在相同本金 ($20,000) 及相同投資期 (半年) 下，計劃甲帶來的未來值 ($20,500.0) 高於計劃乙 ($20,482.9)", ok: true, basicKeep: true },
+        { text: "計劃乙的 ERR 較高；因為計劃乙每年以複息計算利息四次，複息頻率高於計劃甲的每年兩次", ok: false, basicKeep: true },
+        { text: "兩個計劃的 ERR 完全相同；因為兩者的存款期都只有半年", ok: false, basicKeep: false },
+        { text: "無法在不計算全年公式下判斷，因為名義利率與複息頻率均不同", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 如果某儲蓄計劃的「名義回報率」維持不變，下列哪項有關「實際回報率 (ERR)」的陳述是正確的？",
+      opts3: [
+        { text: "實際回報率反映投資的真實回報，且當計算複息的頻率增加時，實際回報率便會上升（但本金增加不會改變實際回報率）", ok: true, basicKeep: true },
+        { text: "當存入的本金金額增加一倍時，該計劃的實際回報率（百分比）亦會隨之上升", ok: false, basicKeep: true },
+        { text: "當每年以複息計算利息多於一次時，實際回報率會低於名義回報率", ok: false, basicKeep: false },
+        { text: "當計算複息的頻率上升時，金融工具列明的名義回報率亦會自動上升", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **計劃甲半年後 FV** $= \\$20,000 \\times (1 + 2.5\\%)^1 = \\mathbf{\\$20,500.0}$；**計劃乙半年後 FV** $= \\$20,000 \\times (1 + 1.2\\%)^2 = \\mathbf{\\$20,482.9}$。<br>2. **不作額外計算推論 ERR**：既然在相同本金及相同半年期下，計劃甲的未來值（及實得利息）高於計劃乙，即證明計劃甲每半年的實際增長率較高，因此**計劃甲的全年實際回報率（ERR）必然較高**！<br>3. **ERR 公式特性**：根據公式 $ERR = (1 + \\frac{i}{m})^m - 1$，ERR 只取決於名義利率 $i$ 與複息頻率 $m$，**與本金大小無關**（故「如本金增加，實際回報率便會上升」是**錯誤**的）！"
+    }
+  ];
+
+  // ==================== 工作區 4：人生財務決策模擬中心（啟發式思維引導） ====================
+  let zone3Cases = [
+    {
+      title: "人生理財決策 1：購買按摩椅的「三個分期付款計劃」現值比較",
+      tag: "消費者分期付款決策｜比較不同分期付款方案的實質成本",
+      guideHint: "思維引導：① 每個計劃的「現在付款額」已經是時段 0 的現值，只須將「2 年後或 3 年後的分期付款額」按 6% 貼現，再與現在付款額相加 ➔ ② 決策角度思考：梁先生是「付款買家（支出方）」，他應該選擇付款總現值最高還是最低的計劃？",
+      desc: "梁先生決定在電器行購買一張高級按摩椅，正考慮以下三個分期付款計劃（假設貼現率為每年 <strong>6%</strong>）：",
+      plans: [
+        { name: "💺 計劃一", detail: "現在付款 $5,000，然後在【2 年後】付款 $6,000（合共支付名義金額 $11,000）" },
+        { name: "💺 計劃二", detail: "現在付款 $7,000，然後在【3 年後】付款 $3,800（合共支付名義金額 $10,800）" },
+        { name: "💺 計劃三", detail: "現在付款 $6,000，然後在【2 年後】付款 $4,800（合共支付名義金額 $10,800）" },
+        { name: "💡 思考重點", detail: "請先計算各計劃的總現值，再從「消費者支付成本」的角度作出最佳選擇！" }
+      ],
+      q1: "1️⃣ 按貼現率每年 6% 計算，「計劃一」與「計劃二」的付款總現值分別是多少（計算至一個小數位）？",
+      opts1: [
+        { text: "計劃一現值：$10,340.0 ｜ 計劃二現值：$10,190.6", ok: true, basicKeep: true },
+        { text: "計劃一現值：$10,660.4 ｜ 計劃二現值：$10,584.9", ok: false, basicKeep: true },
+        { text: "計劃一現值：$9,792.5 ｜ 計劃二現值：$9,097.4", ok: false, basicKeep: false },
+        { text: "計劃一現值：$11,000.0 ｜ 計劃二現值：$10,800.0", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 按貼現率每年 6% 計算，「計劃三（現在付 $6,000 ＋ 2 年後付 $4,800）」的付款總現值是多少（計算至一個小數位）？",
+      opts2: [
+        { text: "$10,190.6", ok: false, basicKeep: false },
+        { text: "$10,272.0", ok: true, basicKeep: true },
+        { text: "$10,340.0", ok: false, basicKeep: true },
+        { text: "$10,800.0", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 綜合三個分期付款計劃的現值，梁先生應選擇哪個計劃？為甚麼？",
+      opts3: [
+        { text: "應選擇「計劃二」；因為對付款買家而言，計劃二的付款總現值 ($10,190.6) 在三個計劃中最低，代表實質付款成本最少", ok: true, basicKeep: true },
+        { text: "應選擇「計劃一」；因為計劃一的現值 ($10,340.0) 最高，代表金錢的時間值最大", ok: false, basicKeep: true },
+        { text: "應選擇「計劃三」；因為計劃三在現在與未來的付款金額最接近", ok: false, basicKeep: false },
+        { text: "三個計劃沒有分別，只須看現在首期付款最少的一個", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **計劃一現值** $= \\$5,000 + \\frac{\\$6,000}{(1.06)^2} = \\$5,000 + \\$5,339.98 = \\mathbf{\\$10,340.0}$。<br>2. **計劃二現值** $= \\$7,000 + \\frac{\\$3,800}{(1.06)^3} = \\$7,000 + \\$3,190.55 = \\mathbf{\\$10,190.6}$。<br>3. **計劃三現值** $= \\$6,000 + \\frac{\\$4,800}{(1.06)^2} = \\$6,000 + \\$4,271.98 = \\mathbf{\\$10,272.0}$。<br>4. **重要防伏**：收取禮物／投資回報時要選現值最高；但**買東西付款時，現值代表付款成本**，故梁先生應選擇**現值最低的「計劃二（$10,190.6）」**！"
+    },
+    {
+      title: "人生理財決策 2：通脹下先算未來留學學費／目標售價、再貼現求今日應存入本金",
+      tag: "兩步跨時空計算｜通脹複息推算未來目標價 ➔ 按投資回報率貼現",
+      guideHint: "思維引導：① 處理受通脹影響的未來目標時，第一步須先用「通脹升幅百分比」計算 3 年後的目標車價或學費（複息計算求 FV） ➔ ② 第二步再用「基金回報率或銀行存款利率」將該筆 3 年後的目標金額貼現回今日（貼現計算求 PV） ➔ ③ 第 3 步當利率在中途下調時，思考第 1 年底帳戶「應有金額（將目標金額按新利率貼現 2 年）」與「實際已有本利和」相差多少。",
+      desc: "以下有兩個受通脹影響的儲蓄目標個案：<br>• <strong>個案 A（買車儲蓄）</strong>：張先生欲於 <strong>3 年後</strong>購買一輛電動車，現時車價為 <strong>$400,000</strong>，車價每年升幅估計為 <strong>4%</strong>。為了 3 年後支付車價，他欲今天一筆過投資一項債券基金，每年複息回報率為 <strong>6%</strong>。<br>• <strong>個案 B（海外留學學費）</strong>：曉晴將於 <strong>3 年後</strong>赴英國修讀碩士課程（須在入學時一筆過繳付全部學費）。該課程學費總額的現值為 <strong>$200,000</strong>，受通脹影響學費每年上升 <strong>3%</strong>。母親林太今天把一筆錢存入銀行，存款年利率為 <strong>8%</strong>（每年複息）。",
+      plans: [
+        { name: "🚗 個案 A：3 年後買電動車", detail: "現時車價 $400,000（每年升 4%）｜ 基金每年複息回報率 6%" },
+        { name: "🎓 個案 B：3 年後交留學學費", detail: "現時學費 $200,000（每年升 3%）｜ 銀行存款年利率 8%" }
+      ],
+      q1: "1️⃣ 在「個案 A」中，該輛電動車在 3 年後的預計售價（FV），以及張先生現時需投資於基金的金額（PV）分別是多少（計算至整數元）？",
+      opts1: [
+        { text: "3 年後車價：$449,946 ｜ 現時需投資金額：$377,783", ok: true, basicKeep: true },
+        { text: "3 年後車價：$448,000 ｜ 現時需投資金額：$392,000", ok: false, basicKeep: true },
+        { text: "3 年後車價：$400,000 ｜ 現時需投資金額：$335,848", ok: false, basicKeep: false },
+        { text: "3 年後車價：$476,406 ｜ 現時需投資金額：$423,472", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 在「個案 B」中，碩士學費在 3 年後（曉晴入學時）的總額（FV），以及母親林太現在須存入銀行的金額（PV）分別是多少（計算至一個小數位）？",
+      opts2: [
+        { text: "3 年後學費：$218,545.4 ｜ 現在須存入金額：$173,489.0", ok: true, basicKeep: true },
+        { text: "3 年後學費：$200,000.0 ｜ 現在須存入金額：$158,766.4", ok: false, basicKeep: true },
+        { text: "3 年後學費：$218,000.0 ｜ 現在須存入金額：$175,806.5", ok: false, basicKeep: false },
+        { text: "3 年後學費：$251,942.4 ｜ 現在須存入金額：$200,000.0", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 承「個案 B」，若林太把 $173,489.0 存入銀行 1 年後（已賺首年 8% 利息變成 $187,368.1），銀行突然把餘下兩年的年利率下調至 6%，林太在「第 1 年底」須額外再存入多少錢，才可在兩年後儲足 $218,545.4 學費？",
+      opts3: [
+        { text: "$7,136.5", ok: true, basicKeep: true },
+        { text: "$3,469.8", ok: false, basicKeep: true },
+        { text: "$9,210.4", ok: false, basicKeep: false },
+        { text: "$11,177.3", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **個案 A（買電動車）**：第 1 步先算 3 年後車價 $FV = \\$400,000 \\times (1 + 4\\%)^3 = \\$449,945.6$；第 2 步按基金回報率 6% 貼現求今日投資額 $PV = \\frac{\\$449,945.6}{(1 + 6\\%)^3} = \\mathbf{\\$377,783}$！<br>2. **個案 B（留學學費）**：3 年後學費總額 $FV = \\$200,000 \\times (1 + 3\\%)^3 = \\mathbf{\\$218,545.4}$；按存款年利率 8% 貼現求今日應存入金額 $PV = \\frac{\\$218,545.4}{(1 + 8\\%)^3} = \\mathbf{\\$173,489.0}$。<br>3. **第 1 年底減息至 6% 須補存金額**：要在餘下 2 年按 6% 增長至 $\\$218,545.4$，第 1 年底帳戶內應有金額 $= \\frac{\\$218,545.4}{(1.06)^2} = \\$194,504.6$；減去原有本利和（$\\$173,489.0 \\times 1.08 = \\$187,368.1$），林太須額外再存入 $\\$194,504.6 - \\$187,368.1 = \\mathbf{\\$7,136.5}$！"
+    },
+    {
+      title: "人生理財決策 3：每年固定日期存入年薪四分之一的複息累積 ＆ 置業首期計算",
+      tag: "多筆定期存款的時間線追蹤 ｜ 置業首期儲蓄計算",
+      guideHint: "思維引導：① 注意審題單位——題目給的是「月薪 $40,000」，請先乘以 12 個月求出「年薪」，再求年薪的四分之一！ ➔ ② 觀察結算日「2023 年 6 月 30 日」：2021 年 7 月 1 日存入的第一筆錢存放了幾年？2022 年 7 月 1 日存入的第二筆錢存放了幾年？2023 年 7 月 1 日的第三筆錢在 6 月 30 日存入了沒有？",
+      desc: "請解決以下兩個儲蓄規劃問題：<br>• <strong>問題 A（分期存入年薪）</strong>：文傑的<strong>月薪為 $40,000</strong>（即年薪為 $480,000）。每年的 <strong>7 月 1 日</strong>，他都會將<strong>年薪的四分之一</strong>存入銀行帳戶，年利率為 <strong>4%</strong>，每年以複息計算利息。文傑的首次存款日為 <strong>2021 年 7 月 1 日</strong>，求帳戶在 <strong>2023 年 6 月 30 日</strong>的存款總額。<br>• <strong>問題 B（置業首期）</strong>：浩然計劃 <strong>3 年後</strong>結婚置業，預算樓價是 <strong>$4,000,000</strong>，須付樓價的 <strong>25% 作為首期</strong>。若銀行定期存款年利率是 <strong>3%</strong>（每年複息），求浩然今天應存入的金額。",
+      plans: [
+        { name: "🗓️ 時間線提示：第一筆存款（2021年7月1日）", detail: "由 2021年7月1日 至 2023年6月30日，共存放了 n = 2 個完整年度" },
+        { name: "🗓️ 時間線提示：第二筆存款（2022年7月1日）", detail: "由 2022年7月1日 至 2023年6月30日，共存放了 n = 1 個完整年度" }
+      ],
+      q1: "1️⃣ 在「問題 A」中，文傑每月月薪 $40,000，他每年 7 月 1 日存入銀行的「年薪的四分之一」是多少？而截至 2023 年 6 月 30 日止，他共存入了多少次款項？",
+      opts1: [
+        { text: "每次存入 $120,000；截至 2023 年 6 月 30 日共存入了 2 次（2021年7月1日 及 2022年7月1日）", ok: true, basicKeep: true },
+        { text: "每次存入 $10,000；截至 2023 年 6 月 30 日共存入了 2 次", ok: false, basicKeep: false },
+        { text: "每次存入 $120,000；截至 2023 年 6 月 30 日共存入了 3 次（含 2023年7月1日）", ok: false, basicKeep: true },
+        { text: "每次存入 $480,000；截至 2023 年 6 月 30 日共存入了 2 次", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 計算文傑的銀行帳戶在「2023 年 6 月 30 日」的存款總額是多少（計算至整數元）？",
+      opts2: [
+        { text: "$129,792", ok: false, basicKeep: false },
+        { text: "$249,600", ok: false, basicKeep: true },
+        { text: "$254,592", ok: true, basicKeep: true },
+        { text: "$374,592", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 在「問題 B（浩然 3 年後付 $4,000,000 樓價的 25% 首期，年利率 3%）」中，浩然今天應存入銀行的金額是多少（計算至整數元）？",
+      opts3: [
+        { text: "$915,142", ok: true, basicKeep: true },
+        { text: "$942,596", ok: false, basicKeep: true },
+        { text: "$1,000,000", ok: false, basicKeep: false },
+        { text: "$3,660,567", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **問題 A（文傑存款額）**：月薪 $\\$40,000 \\implies$ 年薪 $= \\$40,000 \\times 12 = \\$480,000 \\implies$ 年薪四分之一 $= \\$120,000$。<br>• 第一筆（1/7/2021 存入）至 30/6/2023 存放了 **2 年**：$FV_1 = \\$120,000 \\times (1.04)^2 = \\$129,792$。<br>• 第二筆（1/7/2022 存入）至 30/6/2023 存放了 **1 年**：$FV_2 = \\$120,000 \\times (1.04)^1 = \\$124,800$。<br>• （注意：30/6/2023 當日尚未到 1/7/2023，故未有第三筆存款！）**帳戶總額** $= \\$129,792 + \\$124,800 = \\mathbf{\\$254,592}$！<br>2. **問題 B（浩然置業首期）**：3 年後所需首期 $FV = \\$4,000,000 \\times 25\\% = \\$1,000,000$；今天應存入的現值 $PV = \\frac{\\$1,000,000}{(1 + 3\\%)^3} = \\mathbf{\\$915,142}$！"
+    }
+  ];
+
+  // ==================== 狀態管理與渲染引擎 ====================
+  let curZone = 0;
+  let subIdx = [0, 0, 0, 0];
+  let stepPicks = [null, null, null];
+  let doneMap = {};
+  let score = 0;
+  let combo = 0;
+  let isZoom = false;
+
+  function getZoneList(z) {
+    if (z === 0) return zone0Cases;
+    if (z === 1) return zone1Cases;
+    if (z === 2) return zone2Cases;
+    return zone3Cases;
+  }
+
+  function randomizeAll() {
+    [zone0Cases, zone1Cases, zone2Cases, zone3Cases].forEach(list => {
+      list.forEach(item => {
+        item.opts1 = shuffle(item.opts1);
+        item.opts2 = shuffle(item.opts2);
+        item.opts3 = shuffle(item.opts3);
+      });
+    });
+  }
+
+  function reshuffleAll() {
+    randomizeAll();
+    stepPicks = [null, null, null];
+    renderZoneStage();
+  }
+
+  function toggleZoom() {
+    isZoom = !isZoom;
+    document.documentElement.style.setProperty('--scale', isZoom ? '1.16' : '1');
+    document.getElementById("zoomBtn").innerText = isZoom ? "🔍 投影大字體：開" : "🔍 投影大字體：關";
+  }
+
+  function switchZone(z) {
+    curZone = z;
+    for (let i = 0; i < 4; i++) {
+      document.getElementById(`zTab${i}`).className = "nav-item" + (i === z ? " active" : "");
+    }
+    stepPicks = [null, null, null];
+    renderZoneStage();
+  }
+
+  function goSub(idx) {
+    subIdx[curZone] = idx;
+    stepPicks = [null, null, null];
+    renderZoneStage();
+  }
+
+  function moveSub(delta) {
+    const list = getZoneList(curZone);
+    let next = subIdx[curZone] + delta;
+    if (next >= 0 && next < list.length) {
+      goSub(next);
+    } else if (delta > 0 && curZone < 3) {
+      switchZone(curZone + 1);
+    }
+  }
+
+  function pickStep(sIdx, oIdx) {
+    stepPicks[sIdx] = oIdx;
+    renderZoneStage();
+  }
+
+  function autoSolveCurrent() {
+    const item = getZoneList(curZone)[subIdx[curZone]];
+    stepPicks[0] = item.opts1.findIndex(o => o.ok);
+    stepPicks[1] = item.opts2.findIndex(o => o.ok);
+    stepPicks[2] = item.opts3.findIndex(o => o.ok);
+    renderZoneStage();
+  }
+
+  function renderZoneStage() {
+    const list = getZoneList(curZone);
+    const idx = subIdx[curZone];
+    const item = list[idx];
+
+    let dotsHtml = "";
+    for (let i = 0; i < list.length; i++) {
+      const k = `${curZone}_${i}`;
+      const cls = (i === idx) ? "dot-btn active" : (doneMap[k] ? "dot-btn done" : "dot-btn");
+      dotsHtml += `<button class="${cls}" onclick="goSub(${i})">${i + 1}</button>`;
+    }
+
+    const scaffoldHtml = isBasicMode ? `
+      <div class="scaffold-banner">
+        <span class="scaffold-tag">🌱 導學思維引導</span>
+        ${item.guideHint}<br>
+        ✨ <strong>導學支援</strong>：每步已縮小範圍至 2 個核心選項，點選後會<strong>即時標示該步推算是否正確</strong>！
+      </div>
+    ` : '';
+
+    let visualAidHtml = "";
+    if (item.cfTable) {
+      const cols = item.cfTable.map(c => `
+        <div class="cf-col">
+          <div class="cf-yr">${c.yr}</div>
+          <div class="cf-in">${c.inTxt}</div>
+          <div class="cf-out">${c.outTxt}</div>
+          <div class="cf-scrap">${c.scrapTxt}</div>
+        </div>
+      `).join("");
+      visualAidHtml = `<div class="cf-timeline-box"><div class="cf-grid">${cols}</div></div>`;
+    } else if (item.plans) {
+      const pBoxes = item.plans.map(p => `
+        <div class="plan-box">
+          <div class="pb-title">${p.name}</div>
+          <div class="pb-detail">${p.detail}</div>
+        </div>
+      `).join("");
+      visualAidHtml = `<div class="plans-compare-grid">${pBoxes}</div>`;
+    }
+
+    const buildStepCard = (qTitle, optsArr, sIdx) => {
+      const visibleOpts = isBasicMode ? optsArr.filter(o => o.basicKeep) : optsArr;
+      const btns = visibleOpts.map((o) => {
+        const origIdx = optsArr.indexOf(o);
+        const isPicked = (stepPicks[sIdx] === origIdx);
+        let btnCls = "sc-btn";
+        if (isPicked) {
+          btnCls += isBasicMode ? (o.ok ? " picked-ok" : " picked-err") : " picked";
+        }
+        let statusSuffix = "";
+        if (isBasicMode && isPicked) {
+          statusSuffix = o.ok ? " ✅" : " ❌";
+        }
+        return `<button class="${btnCls}" onclick="pickStep(${sIdx}, ${origIdx})">${o.text}${statusSuffix}</button>`;
+      }).join("");
+      return `
+        <div class="step-card">
+          <div class="sc-head">${qTitle}</div>
+          <div class="sc-opts">${btns}</div>
+        </div>
+      `;
+    };
+
+    const stage = document.getElementById("zoneStage");
+    stage.innerHTML = `
+      <div class="stage-header">
+        <div class="sh-title">${item.title} ${getModeBadgeHtml()}</div>
+        <div class="dots-bar">
+          <button class="helper-btn" onclick="autoSolveCurrent()">💡 示範三步滿分方案</button>
+          ${dotsHtml}
+        </div>
+      </div>
+
+      ${scaffoldHtml}
+
+      <div class="case-banner">
+        <span class="cb-tag">📌 ${item.tag}</span>
+        <div class="cb-text">${item.desc}</div>
+      </div>
+
+      ${visualAidHtml}
+
+      <div class="steps-container">
+        ${buildStepCard(item.q1, item.opts1, 0)}
+        ${buildStepCard(item.q2, item.opts2, 1)}
+        ${buildStepCard(item.q3, item.opts3, 2)}
+      </div>
+
+      <div class="feedback-box" id="mainFb"></div>
+    `;
+
+    document.getElementById("footerBar").innerHTML = `
+      <button class="f-nav-btn" onclick="moveSub(-1)" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一實戰個案</button>
+      <button class="f-nav-btn f-primary" onclick="moveSub(1)">
+        ${idx === list.length - 1 ? (curZone < 3 ? '進入下一理財工作區 →' : '已完成本區所有挑戰 ✓') : '下一實戰個案 →'}
+      </button>
+    `;
+
+    if (stepPicks[0] !== null && stepPicks[1] !== null && stepPicks[2] !== null) {
+      const fb = document.getElementById("mainFb");
+      fb.style.display = "block";
+      const ok0 = item.opts1[stepPicks[0]].ok;
+      const ok1 = item.opts2[stepPicks[1]].ok;
+      const ok2 = item.opts3[stepPicks[2]].ok;
+      const key = `${curZone}_${idx}`;
+
+      if (ok0 && ok1 && ok2) {
+        combo++;
+        if (!doneMap[key]) {
+          doneMap[key] = true;
+          score += 2500;
+        }
+        fb.className = "feedback-box fb-ok";
+        fb.innerHTML = `🏆 <strong>三步財務分析全數精準命中！（專業積分 +$2,500）</strong><br>${item.exp}`;
+      } else {
+        combo = 0;
+        fb.className = "feedback-box fb-err";
+        fb.innerHTML = `⚠️ <strong>部分步驟分析有誤：</strong> 第 1 步 [${ok0 ? '✓' : '✗'}] ｜ 第 2 步 [${ok1 ? '✓' : '✗'}] ｜ 第 3 步 [${ok2 ? '✓' : '✗'}]<br>${item.exp}`;
+      }
+      document.getElementById("scoreDisplay").innerText = `$${fmt(score)}`;
+      document.getElementById("comboDisplay").innerText = `🔥 精準決策連擊：${combo}`;
+    }
+  }
+
+  // 初始化啟動
+  randomizeAll();
+  updateSandbox('pv', 10000);
+  renderZoneStage();
+</script>
+</body>
+</html>

@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>企會財智能信貸中心｜第 2 課：消費者信貸</title>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: #ffffff;
+      --soft-bg: #f8fafc;
+      --violet-dark: #1e1b4b;
+      --violet: #6d28d9;
+      --violet-light: #ede9fe;
+      --cyan: #0284c7;
+      --cyan-light: #e0f2fe;
+      --emerald: #059669;
+      --emerald-light: #d1fae5;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+      --rose: #e11d48;
+      --rose-light: #ffe4e6;
+      --text: #0f172a;
+      --muted: #64748b;
+      --scale: 1;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif; user-select: none; }
+    body {
+      background: radial-gradient(circle at top left, #2e1065, #090d16 68%);
+      color: var(--text);
+      padding: 12px;
+      font-size: calc(15.5px * var(--scale));
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+    .fade-in { animation: fadeSlide 0.25s ease-out; }
+    .shake { animation: shake 0.3s ease-in-out; }
+
+    .app-container { max-width: 1140px; margin: 0 auto; }
+
+    /* 頂部：數碼銀行信貸評分與視覺信用卡 Header */
+    .fintech-header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #3b0764 50%, #0f172a 100%);
+      border-radius: 22px;
+      padding: 16px 22px;
+      color: #fff;
+      margin-bottom: 14px;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.5);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .fh-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .virtual-card-mini {
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      color: #0f172a;
+      padding: 9px 14px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: calc(12.5px * var(--scale));
+      box-shadow: 0 6px 14px rgba(217, 119, 6, 0.35);
+      letter-spacing: 0.5px;
+    }
+    .fh-title { font-size: calc(20px * var(--scale)); font-weight: 900; }
+    .fh-sub { font-size: calc(12.5px * var(--scale)); color: #c4b5fd; font-weight: 700; }
+
+    /* 信貸評分儀表與雙軌難度切換器 */
+    .fh-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .diff-switcher {
+      display: inline-flex;
+      background: rgba(9, 13, 22, 0.8);
+      border: 2px solid rgba(251, 191, 36, 0.65);
+      border-radius: 30px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .diff-btn {
+      border: none;
+      padding: 5px 12px;
+      border-radius: 24px;
+      font-weight: 900;
+      font-size: calc(12.5px * var(--scale));
+      cursor: pointer;
+      background: transparent;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+    .diff-btn.active-basic {
+      background: #10b981;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+    }
+    .diff-btn.active-challenge {
+      background: #f59e0b;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
+    }
+
+    .score-gauge {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      padding: 6px 13px;
+      border-radius: 30px;
+      font-weight: 900;
+      font-size: calc(13px * var(--scale));
+      color: #6ee7b7;
+    }
+    .streak-pill {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-weight: 900;
+      font-size: calc(13px * var(--scale));
+      color: #fde047;
+    }
+    .ctrl-btn {
+      background: #a855f7;
+      color: #fff;
+      border: none;
+      padding: 7px 13px;
+      border-radius: 30px;
+      font-weight: 900;
+      font-size: calc(12.5px * var(--scale));
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .ctrl-btn:hover { transform: scale(1.05); background: #9333ea; }
+
+    /* 頂部常駐：四大消費者信貸「計息基數與最低還款陷阱」互動模擬器 */
+    .sim-panel {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff;
+      border-radius: 18px;
+      padding: 16px 22px;
+      margin-bottom: 14px;
+      border: 2px solid #8b5cf6;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    }
+    .sim-top { display: flex; justify-content: space-between; align-items: center; cursor: pointer; flex-wrap: wrap; gap: 10px; }
+    .sim-title { font-size: calc(15.5px * var(--scale)); font-weight: 900; color: #c4b5fd; display: flex; align-items: center; gap: 8px; }
+    .sim-toggle { background: rgba(139, 92, 246, 0.25); color: #ddd6fe; border: 1px solid #8b5cf6; padding: 4px 12px; border-radius: 20px; font-size: calc(12.5px * var(--scale)); font-weight: 900; cursor: pointer; }
+
+    .sim-body { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); }
+    .credit-type-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
+    @media (max-width: 820px) { .credit-type-tabs { grid-template-columns: repeat(2, 1fr); } }
+    .ct-btn {
+      padding: 9px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05); color: #cbd5e1; font-weight: 900; font-size: calc(13px * var(--scale));
+      cursor: pointer; text-align: center; transition: all 0.15s;
+    }
+    .ct-btn:hover { border-color: #a78bfa; color: #fff; }
+    .ct-btn.active { background: #7c3aed; color: #fff; border-color: #ddd6fe; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45); }
+
+    .sim-display-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px; align-items: center; }
+    @media (max-width: 780px) { .sim-display-grid { grid-template-columns: 1fr; } }
+    .sim-sliders { display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.04); padding: 14px; border-radius: 12px; }
+    .sl-row { display: flex; flex-direction: column; gap: 4px; }
+    .sl-label-line { display: flex; justify-content: space-between; font-size: calc(13px * var(--scale)); font-weight: 800; color: #e2e8f0; }
+    .sl-num { color: #fbbf24; font-weight: 900; }
+    input[type="range"] { width: 100%; accent-color: #fbbf24; cursor: pointer; }
+
+    .sim-verdict-card {
+      background: rgba(15, 23, 42, 0.85); border: 2px solid #fbbf24; border-radius: 14px; padding: 14px 16px;
+    }
+    .sv-head { font-size: calc(12.5px * var(--scale)); font-weight: 900; color: #fbbf24; margin-bottom: 4px; }
+    .sv-big { font-size: calc(20px * var(--scale)); font-weight: 900; color: #34d399; margin-bottom: 6px; }
+    .sv-desc { font-size: calc(13px * var(--scale)); color: #cbd5e1; font-weight: 700; line-height: 1.5; }
+
+    /* 四大工作區導航列 */
+    .zone-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (max-width: 780px) { .zone-nav { grid-template-columns: repeat(2, 1fr); } }
+    .z-tab {
+      background: #111827; border: 2px solid #312e81; border-radius: 14px; padding: 12px 10px;
+      color: #94a3b8; cursor: pointer; text-align: center; transition: all 0.2s;
+    }
+    .z-tab:hover { border-color: #a78bfa; color: #fff; transform: translateY(-2px); }
+    .z-tab.active {
+      background: linear-gradient(135deg, #6d28d9, #4f46e5);
+      border-color: #ddd6fe; color: #fff; box-shadow: 0 6px 18px rgba(109, 40, 217, 0.45);
+    }
+    .zt-icon { font-size: calc(23px * var(--scale)); display: block; margin-bottom: 3px; }
+    .zt-title { font-size: calc(14.5px * var(--scale)); font-weight: 900; display: block; }
+    .zt-sub { font-size: calc(11.5px * var(--scale)); opacity: 0.9; }
+
+    /* 主工作舞台 */
+    .main-stage {
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 540px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid #cbd5e1;
+    }
+
+    .stage-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; }
+    .sh-title { font-size: calc(18px * var(--scale)); font-weight: 900; color: var(--violet-dark); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .mode-pill-indicator { font-size: calc(12px * var(--scale)); padding: 3px 10px; border-radius: 20px; font-weight: 900; }
+    .mp-basic { background: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+    .mp-challenge { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+
+    .dots-bar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .dot-btn {
+      width: calc(34px * var(--scale)); height: calc(34px * var(--scale));
+      border-radius: 10px; border: 2px solid #cbd5e1; background: #fff;
+      font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; color: var(--muted);
+    }
+    .dot-btn.active { background: var(--violet); color: #fff; border-color: var(--violet); }
+    .dot-btn.done { background: var(--emerald-light); color: var(--emerald); border-color: var(--emerald); }
+
+    /* 啟發式導學引導卡（只在基礎導學模式顯示） */
+    .scaffold-banner {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid #34d399;
+      border-left: 7px solid var(--emerald);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      color: #064e3b;
+      font-size: calc(14px * var(--scale));
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .scaffold-tag {
+      display: inline-block;
+      background: var(--emerald);
+      color: #fff;
+      font-size: calc(11.5px * var(--scale));
+      font-weight: 900;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin-right: 6px;
+      margin-bottom: 3px;
+    }
+
+    /* 案例與結單視覺卡片 */
+    .statement-card {
+      background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+      border: 2px solid #c4b5fd;
+      border-left: 7px solid var(--violet);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .sc-tag { font-size: calc(12px * var(--scale)); font-weight: 900; color: var(--violet); margin-bottom: 4px; display: block; }
+    .sc-desc { font-size: calc(15.5px * var(--scale)); font-weight: 900; color: #1e1b4b; line-height: 1.55; }
+
+    .mini-table-wrap { overflow-x: auto; margin-bottom: 16px; }
+    .stmt-table { width: 100%; border-collapse: collapse; font-size: calc(13.5px * var(--scale)); font-weight: 800; background: #fff; border-radius: 12px; overflow: hidden; border: 2px solid #cbd5e1; }
+    .stmt-table th { background: #1e1b4b; color: #fff; padding: 8px 12px; text-align: left; }
+    .stmt-table td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a; }
+
+    /* 三步對稱決策卡 */
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 820px) { .steps-grid { grid-template-columns: 1fr; } }
+    .step-col {
+      background: var(--soft-bg); border: 2px solid #cbd5e1; border-radius: 14px; padding: 14px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .step-q { font-size: calc(13.5px * var(--scale)); font-weight: 900; color: var(--violet-dark); margin-bottom: 10px; min-height: 42px; }
+    .step-opts { display: flex; flex-direction: column; gap: 7px; }
+    .step-btn {
+      width: 100%; padding: 10px 12px; border-radius: 9px; border: 2px solid #cbd5e1;
+      background: #fff; font-weight: 800; font-size: calc(13.5px * var(--scale)); color: var(--text);
+      cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.45;
+    }
+    .step-btn:hover { border-color: var(--violet); background: var(--violet-light); }
+    .step-btn.picked { background: var(--violet-light); border-color: var(--violet); color: #2e1065; box-shadow: inset 0 0 0 1px var(--violet); }
+    .step-btn.picked-ok { background: var(--emerald-light); border-color: var(--emerald); color: #064e3b; }
+    .step-btn.picked-err { background: var(--rose-light); border-color: var(--rose); color: #881337; }
+
+    /* 模組 4：紅筆捉錯 ＆ 選擇題消去雙擂台 */
+    .sub-mode-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .sub-mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #cbd5e1; background: #f8fafc; font-weight: 900; font-size: calc(14px * var(--scale)); cursor: pointer; color: var(--muted); }
+    .sub-mode-btn.active { background: var(--violet-dark); color: #fff; border-color: var(--violet-dark); }
+    .paper-sheet { background: #fefce8; border: 2px solid #fde047; border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+    .sentence-chips-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .sentence-chip { padding: 14px 16px; border-radius: 12px; border: 2px solid #cbd5e1; background: #fff; font-size: calc(15px * var(--scale)); font-weight: 800; color: var(--text); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; line-height: 1.5; }
+    .sentence-chip:hover { border-color: var(--rose); background: #fff1f2; }
+    .sentence-chip.flaw-found { border-color: var(--rose); background: #ffe4e6; color: #9f1239; text-decoration: line-through; }
+    .sentence-chip.good-clicked { border-color: var(--emerald); background: #dcfce7; color: #14532d; }
+
+    .elim-stmt-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; flex-wrap: wrap; }
+    .elim-stmt-text { font-size: calc(15px * var(--scale)); font-weight: 800; flex: 1; min-width: 240px; }
+    .elim-stmt-hint { display: block; font-size: calc(12.5px * var(--scale)); color: #047857; font-weight: 800; margin-top: 4px; }
+    .elim-toggles { display: flex; gap: 6px; }
+    .elim-btn { padding: 6px 12px; border-radius: 8px; border: 2px solid #cbd5e1; background: #fff; font-weight: 900; font-size: calc(13.5px * var(--scale)); cursor: pointer; }
+    .elim-btn.t-true { background: var(--emerald); color: #fff; border-color: var(--emerald); }
+    .elim-btn.t-false { background: var(--rose); color: #fff; border-color: var(--rose); }
+    .mc-options-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+    @media (max-width: 600px) { .mc-options-row { grid-template-columns: 1fr; } }
+    .mc-card-btn { padding: 14px 18px; border-radius: 12px; border: 2px solid #94a3b8; background: #fff; font-size: calc(16px * var(--scale)); font-weight: 900; text-align: left; cursor: pointer; transition: all 0.2s; }
+    .mc-card-btn:hover { border-color: var(--violet); background: var(--violet-light); }
+    .mc-card-btn.eliminated { opacity: 0.28; text-decoration: line-through; background: #e2e8f0; border-color: #cbd5e1; }
+
+    .helper-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--violet); background: var(--violet-light); color: var(--violet-dark); font-weight: 900; font-size: calc(12.5px * var(--scale)); cursor: pointer; }
+    .helper-btn:hover { background: var(--violet); color: #fff; }
+
+    .feedback-box { margin-top: 12px; padding: 16px 18px; border-radius: 14px; font-size: calc(14.5px * var(--scale)); font-weight: 700; display: none; line-height: 1.65; }
+    .fb-ok { background: var(--emerald-light); border: 2px solid var(--emerald); color: #064e3b; }
+    .fb-err { background: var(--rose-light); border: 2px solid var(--rose); color: #881337; }
+
+    .footer-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 12px; border-top: 2px solid #e2e8f0; }
+    .f-nav-btn { padding: 10px 20px; border-radius: 10px; border: 2px solid #cbd5e1; background: #fff; font-weight: 900; font-size: calc(14px * var(--scale)); cursor: pointer; color: var(--violet-dark); }
+    .f-nav-btn:hover { background: var(--violet-light); border-color: var(--violet); }
+    .f-primary { background: linear-gradient(135deg, #6d28d9, #4f46e5); color: #fff; border: none; }
+    .f-primary:hover { opacity: 0.92; }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- 頂部：智能個人信貸與雙軌學習難度切換器（預設開啟「🔥 實戰挑戰」） -->
+  <header class="fintech-header">
+    <div class="fh-left">
+      <div class="virtual-card-mini">💳 BAFS CREDIT<br>4512 •••• •••• 8899</div>
+      <div>
+        <div class="fh-title">基礎個人理財｜第 2 課：消費者信貸</div>
+        <div class="fh-sub">信用卡、銀行透支、信貸限額（循環貸款）、分期付款貸款 ＆ 個人信貸記錄管理</div>
+      </div>
+    </div>
+    <div class="fh-right">
+      <div class="diff-switcher" title="切換學習模式：預設為實戰挑戰；如需思維引導與分步回饋可切換至基礎導學">
+        <button class="diff-btn" id="btnBasicMode" onclick="setDifficulty(true)">🌱 基礎導學</button>
+        <button class="diff-btn active-challenge" id="btnChallengeMode" onclick="setDifficulty(false)">🔥 實戰挑戰</button>
+      </div>
+      <div class="score-gauge" id="tuScoreBadge">📊 信貸評分：A 級 (800 分)</div>
+      <div class="streak-pill" id="comboBadge">🔥 連擊：0</div>
+      <button class="ctrl-btn" onclick="reshuffleAll()">🔀 洗牌</button>
+      <button class="ctrl-btn" onclick="toggleZoom()" id="zoomBtn">🔍 大字體：關</button>
+    </div>
+  </header>
+
+  <!-- 頂部常駐：四大消費者信貸「計息金額基礎與最低還款陷阱」互動模擬器 -->
+  <section class="sim-panel">
+    <div class="sim-top" onclick="toggleSimPanel()">
+      <div class="sim-title">🎛️ 互動「四大消費者信貸計息基礎 ＆ 最低還款陷阱」模擬器（點擊展開／收起）</div>
+      <button class="sim-toggle" id="simToggleBtn">收起模擬器 ▲</button>
+    </div>
+    <div class="sim-body" id="simBody">
+      <div class="credit-type-tabs">
+        <button class="ct-btn active" id="ct0" onclick="switchSimType(0)">💳 1. 信用卡計息基礎</button>
+        <button class="ct-btn" id="ct1" onclick="switchSimType(1)">🏦 2. 透支服務計息基礎</button>
+        <button class="ct-btn" id="ct2" onclick="switchSimType(2)">🔄 3. 信貸限額（循環貸款）</button>
+        <button class="ct-btn" id="ct3" onclick="switchSimType(3)">📅 4. 分期付款貸款</button>
+        <button class="ct-btn" id="ct4" onclick="switchSimType(4)">⚠️ 5. 信用卡最低還款陷阱</button>
+      </div>
+      <div id="simInteractiveArea"></div>
+    </div>
+  </section>
+
+  <!-- 四大互動實戰工作區導航 -->
+  <nav class="zone-nav">
+    <button class="z-tab active" onclick="switchZone(0)" id="zTab0">
+      <span class="zt-icon">💳</span>
+      <span class="zt-title">四大信貸機制診斷</span>
+      <span class="zt-sub">計息基數、EPS 與流動支付</span>
+    </button>
+    <button class="z-tab" onclick="switchZone(1)" id="zTab1">
+      <span class="zt-icon">🧭</span>
+      <span class="zt-title">信貸方案配對顧問</span>
+      <span class="zt-sub">按收入穩定性與用途揀選</span>
+    </button>
+    <button class="z-tab" onclick="switchZone(2)" id="zTab2">
+      <span class="zt-icon">📊</span>
+      <span class="zt-title">個人信貸記錄管理</span>
+      <span class="zt-sub">五大影響因素與批核分析</span>
+    </button>
+    <button class="z-tab" onclick="switchZone(3)" id="zTab3">
+      <span class="zt-icon">🏆</span>
+      <span class="zt-title">捉錯與消去雙擂台</span>
+      <span class="zt-sub">紅筆批改 ＋ 組合選擇題</span>
+    </button>
+  </nav>
+
+  <!-- 主舞台 -->
+  <main class="main-stage" id="mainStage"></main>
+</div>
+
+<script>
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function fmt(num) {
+    return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  // ==================== 雙軌學習難度狀態（預設為實戰挑戰模式） ====================
+  let isBasicMode = false;
+
+  function setDifficulty(basic) {
+    isBasicMode = basic;
+    document.getElementById("btnBasicMode").className = "diff-btn" + (basic ? " active-basic" : "");
+    document.getElementById("btnChallengeMode").className = "diff-btn" + (!basic ? " active-challenge" : "");
+    renderStage();
+  }
+
+  function getModeBadgeHtml() {
+    return isBasicMode
+      ? `<span class="mode-pill-indicator mp-basic">🌱 基礎導學模式（思維引導＋分步回饋）</span>`
+      : `<span class="mode-pill-indicator mp-challenge">🔥 實戰挑戰模式（標準考試難度）</span>`;
+  }
+
+  // ==================== 頂部模擬器邏輯 ====================
+  let simOpen = true;
+  let simType = 0;
+  let simVals = {
+    ccLimit: 80000, ccBill: 40000, ccPaid: 15000,
+    odLimit: 40000, odWithdraw: 25000, odBankBal: 21000,
+    locLimit: 120000, locBorrowed: 60000, locRepaid: 20000,
+    instLoan: 120000
+  };
+
+  function toggleSimPanel() {
+    simOpen = !simOpen;
+    document.getElementById("simBody").style.display = simOpen ? "block" : "none";
+    document.getElementById("simToggleBtn").innerText = simOpen ? "收起模擬器 ▲" : "展開模擬器 ▼";
+  }
+
+  function switchSimType(t) {
+    simType = t;
+    for (let i = 0; i < 5; i++) {
+      document.getElementById(`ct${i}`).className = "ct-btn" + (i === t ? " active" : "");
+    }
+    renderSimArea();
+  }
+
+  function updateSimVal(k, v) {
+    simVals[k] = Number(v);
+    renderSimArea();
+  }
+
+  function renderSimArea() {
+    const box = document.getElementById("simInteractiveArea");
+    if (simType === 0) {
+      const unpaid = Math.max(0, simVals.ccBill - simVals.ccPaid);
+      box.innerHTML = `
+        <div class="sim-display-grid">
+          <div class="sim-sliders">
+            <div class="sl-row">
+              <div class="sl-label-line"><span>預先批核信用額（不按此金額計息！）</span><span class="sl-num">$${fmt(simVals.ccLimit)}</span></div>
+            </div>
+            <div class="sl-row">
+              <div class="sl-label-line"><span>本月結單總結欠</span><span class="sl-num">$${fmt(simVals.ccBill)}</span></div>
+              <input type="range" min="10000" max="80000" step="5000" value="${simVals.ccBill}" oninput="updateSimVal('ccBill', this.value)">
+            </div>
+            <div class="sl-row">
+              <div class="sl-label-line"><span>到期還款日前償還金額</span><span class="sl-num">$${fmt(simVals.ccPaid)}</span></div>
+              <input type="range" min="1000" max="${simVals.ccBill}" step="1000" value="${Math.min(simVals.ccPaid, simVals.ccBill)}" oninput="updateSimVal('ccPaid', this.value)">
+            </div>
+          </div>
+          <div class="sim-verdict-card">
+            <div class="sv-head">📌 信用卡計息基礎：按到期還款日後未清償的「結欠餘額」計算</div>
+            <div class="sv-big">計息金額：$${fmt(unpaid)} ${unpaid === 0 ? '（全數清還免息！）' : ''}</div>
+            <div class="sv-desc">
+              • <strong>借款後即時計算利息嗎？</strong> 【不是！】只要在到期還款日前全數償還欠款 ($${fmt(simVals.ccBill)})，便無須繳付任何利息。<br>
+              • 若只繳付部分款項或最低還款額，發卡機構便會按未清償的<strong>結欠餘額 ($${fmt(unpaid)})</strong> 收取高昂利息（而非按信用額 $${fmt(simVals.ccLimit)} 計息）！
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (simType === 1) {
+      const odAmt = Math.max(0, simVals.odWithdraw - simVals.odBankBal);
+      box.innerHTML = `
+        <div class="sim-display-grid">
+          <div class="sim-sliders">
+            <div class="sl-row">
+              <div class="sl-label-line"><span>預先批核透支信用額：$${fmt(simVals.odLimit)} ｜ 往來帳戶原有存款餘額</span><span class="sl-num">$${fmt(simVals.odBankBal)}</span></div>
+              <input type="range" min="0" max="30000" step="1000" value="${simVals.odBankBal}" oninput="updateSimVal('odBankBal', this.value)">
+            </div>
+            <div class="sl-row">
+              <div class="sl-label-line"><span>簽發支票／提取款項總額</span><span class="sl-num">$${fmt(simVals.odWithdraw)}</span></div>
+              <input type="range" min="5000" max="40000" step="1000" value="${simVals.odWithdraw}" oninput="updateSimVal('odWithdraw', this.value)">
+            </div>
+          </div>
+          <div class="sim-verdict-card">
+            <div class="sv-head">📌 透支服務計息基礎：按「透支金額」每日計息</div>
+            <div class="sv-big">計息透支金額：$${fmt(odAmt)}</div>
+            <div class="sv-desc">
+              • <strong>透支金額</strong> ＝ 提款額 ($${fmt(simVals.odWithdraw)}) － 銀行帳戶存款餘額 ($${fmt(simVals.odBankBal)}) ＝ <strong>$${fmt(odAmt)}</strong>。<br>
+              • <strong>借款後即時計算利息嗎？</strong> 【是！】銀行會就帳戶持有人的透支金額<strong>每日計算利息</strong>（注意：並非按月計息，亦非按批核信用額計息）！
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (simType === 2) {
+      const locBal = Math.max(0, simVals.locBorrowed - simVals.locRepaid);
+      const availLimit = simVals.locLimit - locBal;
+      box.innerHTML = `
+        <div class="sim-display-grid">
+          <div class="sim-sliders">
+            <div class="sl-row">
+              <div class="sl-label-line"><span>已批核信貸限額（循環貸款信用額）：$${fmt(simVals.locLimit)} ｜ 已提取借款</span><span class="sl-num">$${fmt(simVals.locBorrowed)}</span></div>
+              <input type="range" min="0" max="120000" step="5000" value="${simVals.locBorrowed}" oninput="updateSimVal('locBorrowed', this.value)">
+            </div>
+            <div class="sl-row">
+              <div class="sl-label-line"><span>現已償還款項（還款後可用信用額自動回復！）</span><span class="sl-num">$${fmt(simVals.locRepaid)}</span></div>
+              <input type="range" min="0" max="${simVals.locBorrowed}" step="5000" value="${Math.min(simVals.locRepaid, simVals.locBorrowed)}" oninput="updateSimVal('locRepaid', this.value)">
+            </div>
+          </div>
+          <div class="sim-verdict-card">
+            <div class="sv-head">📌 信貸限額（循環貸款）計息基礎：按「貸款額（即結欠餘額）」計息</div>
+            <div class="sv-big">計息結欠餘額：$${fmt(locBal)} ｜ 自動回復可用信用額：$${fmt(availLimit)}</div>
+            <div class="sv-desc">
+              • <strong>借款後即時計算利息嗎？</strong> 【是！】但只會在消費者<strong>實際提取借款時</strong>才按結欠餘額計息（若批核後從未提款，利息為 $0）。<br>
+              • <strong>核心優點</strong>：利率一般比信用卡和透支服務低，且還款靈活、還款後可用信用額自動回復！
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (simType === 3) {
+      box.innerHTML = `
+        <div class="sim-display-grid">
+          <div class="sim-sliders">
+            <div class="sl-row">
+              <div class="sl-label-line"><span>一筆過批出之分期付款「貸款額」</span><span class="sl-num">$${fmt(simVals.instLoan)}</span></div>
+              <input type="range" min="20000" max="200000" step="10000" value="${simVals.instLoan}" oninput="updateSimVal('instLoan', this.value)">
+            </div>
+          </div>
+          <div class="sim-verdict-card">
+            <div class="sv-head">📌 分期付款貸款計息基礎：按「貸款額」計算</div>
+            <div class="sv-big">計息基礎（貸款額）：$${fmt(simVals.instLoan)}</div>
+            <div class="sv-desc">
+              • <strong>與前三者的最大分別</strong>：設有<strong>固定還款次數</strong>及預先訂立的<strong>固定還款安排</strong>（<strong>不設</strong>每月最低還款額，亦不可循環再用信用額）。<br>
+              • <strong>好處與壞處</strong>：利率通常最低，且<strong>促使借款人在借款前預先擬定還款計劃</strong>；但壞處是<strong>還款安排欠缺靈活性</strong>（不適合收入不穩定的自由工作者或失業人士）。
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      box.innerHTML = `
+        <div class="sim-verdict-card" style="border-color:#fb7185;">
+          <div class="sv-head" style="color:#fda4af;">⚠️ 只繳付信用卡「每月最低還款額」的嚴重複息後果</div>
+          <div class="sv-big" style="color:#fb7185;">假設信用卡結欠餘額：$30,000（實際年利率逾 30%！）</div>
+          <div class="sv-desc">
+            假設沒有任何新增簽帳，如果持卡人每個月都只繳付「每月最低還款額」：<br>
+            • ⏳ <strong>全數還清欠款所需時間</strong>：往往長達 <strong>20 多至 30 年</strong>！<br>
+            • 💸 <strong>最終實際償還總金額</strong>：會累積至原來欠款的 <strong>3 倍以上</strong>（絕大部分還款都用來支付高昂複息，令債務迅速累積）！
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // ==================== 工作區 1：四大信貸機制診斷（啟發式思維引導） ====================
+  let zone0Cases = [
+    {
+      title: "機制診斷 1：信用卡月結單分析、計息基數與發卡特點",
+      tag: "信用卡結單解讀 ｜ 信用額 vs 結單總結欠 vs 結欠餘額",
+      guideHint: "思維引導：① 信用卡計算逾期利息時，是以「預先批核信用額」、「本月結單總結欠」還是扣除已還款項後的「未清償結欠餘額」為基礎？ ➔ ② 區分「到期還款日（繳款期限）」與「全數償還貸款的限期」 ➔ ③ 回想香港的信用卡除了持牌銀行外，還可由哪些機構發行？",
+      desc: "林小美收到發卡銀行寄來的 10 月份信用卡月結單，結單資料如下。假設林小美在到期還款日（11 月 25 日）前只透過網上銀行繳付了 <strong>$6,000</strong>（高於每月最低還款額 $500，但未全數清還總結欠）。",
+      tableHtml: `
+        <table class="stmt-table">
+          <thead><tr><th>預先批核信用額</th><th>結單日期</th><th>到期還款日</th><th>結單總結欠</th><th>每月最低還款額</th></tr></thead>
+          <tbody><tr><td>HK$80,000</td><td>10月31日</td><td>11月25日</td><td>HK$24,000</td><td>HK$500</td></tr></tbody>
+        </table>
+      `,
+      q1: "1️⃣ 當林小美在到期還款日前只償還了 $6,000，發卡機構會按哪個金額向她計算並收取信用卡利息？",
+      opts1: [
+        { text: "$18,000（到期還款日後仍未清償的結欠餘額）", ok: true, basicKeep: true },
+        { text: "$24,000（本月的結單總結欠全額）", ok: false, basicKeep: true },
+        { text: "$80,000（預先批核的信用額）", ok: false, basicKeep: false },
+        { text: "$0（因為她已繳付高於每月最低還款額 $500）", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 下列哪項有關林小美使用該張信用卡的還款期限與利息計算規則的描述是正確的？",
+      opts2: [
+        { text: "信用卡設有到期還款日（繳款期限），但不設全數償還貸款的限期；只要在到期還款日前全數清還總結欠，便無須繳付任何利息", ok: true, basicKeep: true },
+        { text: "信用卡在持卡人簽帳消費或收到月結單的一刻起，便會即時按日計算高昂利息", ok: false, basicKeep: true },
+        { text: "由於林小美在 11 月 25 日沒有全數清還 $24,000，她的信用卡帳戶會被即時取消而不能繼續使用", ok: false, basicKeep: false },
+        { text: "信用卡規定持卡人必須在固定的期數內平均分期還清所有結欠本金和利息", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 信用卡營辦商（如 Visa、萬事達卡、美國運通、銀聯國際）與發卡機構在發行信用卡上有何特點？",
+      opts3: [
+        { text: "信用卡可由銀行或其他商業組織發行（或由銀行與非財務機構聯合發行）；除美國運通外，信用卡營辦商一般透過銀行發行信用卡", ok: true, basicKeep: true },
+        { text: "在香港流通的所有信用卡，在法律上只能由持牌商業銀行及專營個人貸款的財務公司單獨發行", ok: false, basicKeep: true },
+        { text: "持卡人在全香港所有零售商店及食肆以信用卡付款，在任何金額下都必定獲接受並享有折扣優惠", ok: false, basicKeep: false },
+        { text: "所有信用卡在申請時都必須提供物業或定期存款作為抵押品，屬於有抵押長期個人融資工具", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **信用卡計息基數**：信用卡是按到期還款日後仍未清償的**「結欠餘額」**（即總結欠 $\\$24,000 - \\text{已還 } \\$6,000 = \\mathbf{\\$18,000}$）收取利息，絕非按信用額 $\\$80,000$ 計息！<br>2. **最低還款額誤區**：以為只要繳付每月最低還款額便不用付息是完全錯誤的！只要到期還款日後仍有結欠餘額，便須就餘額繳付高昂利息；但只要繳付了最低還款額，仍可繼續使用該信用卡。<br>3. **發卡機構**：信用卡是由銀行或**其他商業組織**發行（並非只能由銀行和財務公司發行）！"
+    },
+    {
+      title: "機制診斷 2：易辦事（EPS）提款卡 vs 流動支付平台的兩大支付系統",
+      tag: "電子支付系統原理比較 ｜ 借記支付系統 vs 信用支付系統",
+      guideHint: "思維引導：① 比較「信用卡」與「易辦事（EPS）提款卡」——當銀行儲蓄帳戶餘額不足時，哪一種仍可讓持卡人先消費後付款？ ➔ ② 分辨流動支付平台的「借記支付系統（即時從正數餘額扣款）」與「信用支付系統（透過信用卡先消費後還款）」 ➔ ③ 思考電子支付的便利性與推廣活動如何影響消費自制力。",
+      desc: "現代消費者除了直接使用實體信用卡刷卡外，亦經常使用「附有易辦事（EPS）功能的提款卡」以及各種「流動支付平台（如八達通、Visa payWave、MasterPass、微信支付、支付寶、拍住賞等）」進行日常付款。",
+      tableHtml: `
+        <table class="stmt-table">
+          <thead><tr><th>比較項目</th><th>信用卡</th><th>附有易辦事 (EPS) 的提款卡</th><th>流動支付：借記支付系統</th><th>流動支付：信用支付系統</th></tr></thead>
+          <tbody>
+            <tr><td>資金來源與扣款時間</td><td>向銀行借款（先消費後還款）</td><td>即時直接從銀行帳戶扣除</td><td>需確保帳戶餘額為正數，即時扣款</td><td>透過信用卡帳戶先消費後還款</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 比較「信用卡」與「附有易辦事（EPS）功能的提款卡」，兩者在購物付款上有何主要異同？",
+      opts1: [
+        { text: "兩者均能讓持卡人在沒有攜帶現鈔下購物；但只有信用卡能讓持卡人在銀行帳戶沒有足夠存款的情況下（向銀行借款）購物", ok: true, basicKeep: true },
+        { text: "兩者均屬於向銀行借款的消費者信貸工具，即使銀行帳戶餘額為零，仍可透支消費並於下月還款", ok: false, basicKeep: true },
+        { text: "使用易辦事（EPS）提款卡購物會即時從銀行帳戶扣款，且持卡人可在月底選擇只償還每月最低還款額", ok: false, basicKeep: false },
+        { text: "使用信用卡購物會即時從持卡人的儲蓄帳戶扣除存款，而使用易辦事提款卡則會在一個月後才發出月結單收款", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 流動支付平台所採用的「借記支付系統」與「信用支付系統」分別有何運作特點及代表例子？",
+      opts2: [
+        { text: "借記支付系統（如八達通）須確保帳戶餘額為正數並在購物時即時扣款；信用支付系統（如 Visa payWave 及 MasterPass）則透過信用卡帳戶讓消費者先消費後還款", ok: true, basicKeep: true },
+        { text: "借記支付系統的代表例子為 Visa payWave 及 MasterPass；信用支付系統的代表例子則為八達通及易辦事（EPS）", ok: false, basicKeep: true },
+        { text: "所有流動支付平台（包括微信支付、支付寶及拍住賞）在技術上都只能單一採用信用支付系統，無法連結銀行帳戶即時扣款", ok: false, basicKeep: false },
+        { text: "借記支付系統容許消費者在帳戶餘額為負數時無限額透支，而信用支付系統則要求消費者必須預先增值現鈔才可消費", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 網上購物及電子支付普及，為何容易導致欠缺自律的消費者濫用信用卡並累積龐大債務？",
+      opts3: [
+        { text: "因為網購付款極為方便、網上推廣活動繁多且商品種類多元化，加上以信用卡購物無須即時以自己的金錢付款，容易養成過度消費及只還最低還款額的習慣", ok: true, basicKeep: true },
+        { text: "因為網上商店在法例上強制規定所有顧客只能繳付信用卡的每月最低還款額，禁止顧客在到期還款日前全數清還卡數", ok: false, basicKeep: true },
+        { text: "因為在海外及本地網上商店使用信用卡購物時，發卡銀行會即時按消費總額的 50% 收取固定手續費", ok: false, basicKeep: false },
+        { text: "因為使用信用卡在網上購物無法享有任何積分或消費回贈，導致消費者的購物成本大幅上升", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **信用卡 vs 易辦事（EPS）**：兩者都不用帶現金，但 EPS 是即時直接從銀行帳戶扣除存款（銀行帳戶沒有足夠存款便不能購物）；信用卡則是向銀行借款（先消費後付款）。<br>2. **流動支付兩大系統**：**借記支付系統**（如八達通）須確保餘額為正數並即時扣除消費額；**信用支付系統**（如 Visa payWave、MasterPass）則透過信用卡帳戶先消費後還款（微信支付、支付寶、雲閃付、拍住賞則同時採用兩種系統）！"
+    },
+    {
+      title: "機制診斷 3：四大消費者信貸的「計息時點、計息基數與信貸限額特性」全方位比拼",
+      tag: "四大信貸工具橫向對比 ｜ 銀行透支 vs 信貸限額（循環貸款）vs 分期付款貸款",
+      guideHint: "思維引導：① 當簽發支票金額（$35,000）超出往來帳戶原有存款（$29,000）時，超出部分的差額是多少？銀行透支按甚麼頻率計息？ ➔ ② 比較「信貸限額（循環貸款）」與「分期付款貸款」在計息基礎（結欠餘額 vs 貸款額）及還款安排（有否最低還款額、是否固定期數）上的差異。",
+      desc: "周太太的銀行往來帳戶原有存款 <strong>$29,000</strong>（已獲批核透支信用額 $50,000），她開出一張 <strong>$35,000 支票</strong>支付家居裝修工程尾數，銀行沒有拒付該支票。另一方面，陳先生獲銀行批核了一個信用額為 <strong>$120,000 的信貸限額（循環貸款）</strong>，他提取了 $50,000 作短期周轉。",
+      tableHtml: `
+        <table class="stmt-table">
+          <thead><tr><th>比較維度</th><th>信用卡</th><th>透支（銀行透支）</th><th>信貸限額（循環貸款）</th><th>分期付款貸款</th></tr></thead>
+          <tbody>
+            <tr><td>借款後即時計算利息？</td><td>不是（免息期內全數清還免息）</td><td>是（按日計息）</td><td>是（提款時起計）</td><td>是</td></tr>
+            <tr><td>設有每月最低還款額？</td><td>是</td><td>通常是</td><td>是</td><td>不是（固定每期還款）</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 在周太太開出 $35,000 支票支付裝修費的個案中，她使用了哪種消費者信貸？銀行會如何計算利息？",
+      opts1: [
+        { text: "使用了「銀行透支」；這是一種通常毋須抵押、沒有固定還款期的信貸，銀行會就其「透支金額 $6,000」每日計算利息", ok: true, basicKeep: true },
+        { text: "使用了「銀行透支」；銀行會就其預先批核的「透支信用額 $50,000」按月計算固定利息", ok: false, basicKeep: true },
+        { text: "使用了「信貸限額（循環貸款）」；銀行會就其支票面額 $35,000 在一個月免息期後才開始計算利息", ok: false, basicKeep: false },
+        { text: "使用了「分期付款貸款」；銀行會要求她在未來 12 個月按固定期數平均償還 $35,000 本金及利息", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 下列哪項有關陳先生使用的「信貸限額（又稱循環貸款）」與「透支服務」的比較是正確的？",
+      opts2: [
+        { text: "信貸限額一經批核，只會在消費者實際提取借款時才按「結欠餘額」收取利息（償還欠款後可用信用額自動回復），且其利率一般比信用卡和透支服務低", ok: true, basicKeep: true },
+        { text: "信貸限額一經銀行批核，即使陳先生從未提取任何借款，他仍須每月按 $120,000 信用額向銀行繳付固定利息", ok: false, basicKeep: true },
+        { text: "信貸限額與信用卡一樣，可讓陳先生在沒有現金的情況下，直接在全港所有零售商店刷卡購物並享有一個月免息期", ok: false, basicKeep: false },
+        { text: "透支服務的利率在所有消費者信貸中最低，且無須配合往來存款帳戶使用", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 比較「分期付款貸款」與「信貸限額（循環貸款）」，兩者之間有甚麼核心分別？",
+      opts3: [
+        { text: "分期付款貸款按「貸款額」計息、不設每月最低還款額，並能促使借款人預先擬定還款計劃；信貸限額則按「結欠餘額」計息、設有每月最低還款額且還款靈活", ok: true, basicKeep: true },
+        { text: "分期付款貸款的利息按「結欠餘額」計算且可隨時循環再借；信貸限額的利息則按預先批核的「信用額」計算", ok: false, basicKeep: true },
+        { text: "分期付款貸款又稱為循環貸款，兩者均不設全數償還貸款的限期，亦沒有規定分期還款的次數", ok: false, basicKeep: false },
+        { text: "分期付款貸款的利率一般比信用卡及銀行透支高昂，只適合用作日常小額超市購物", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **銀行透支**：往來帳戶有 $\\$29,000$，開出 $\\$35,000$ 支票，超出存款額的 **$\\$6,000$ 就是透支金額**。銀行透支有助避免支票遭銀行拒付（省卻拒付手續費或罰款），通常無抵押、無固定還款期，並按透支金額**每日計算利息**！<br>2. **信貸限額（循環貸款）**：只會在實際借款時按結欠餘額收息；可隨時在預先批核信用額內提款且無須每次重新辦理申請手續，還款後可用信用額自動回復。<br>3. **分期付款貸款 vs 信貸限額**：分期付款貸款按「貸款額」計息且設固定期數（不設最低還款額），信貸限額則按「結欠餘額」計息且設每月最低還款額！"
+    }
+  ];
+
+  // ==================== 工作區 2：信貸方案配對顧問（啟發式思維引導） ====================
+  let zone1Cases = [
+    {
+      title: "信貸顧問個案 1：收入不穩定的自由攝影師 vs 購買昂貴汽車／海外婚禮開支",
+      tag: "按「收入穩定性」與「所購物品價值」匹配最佳信貸工具",
+      guideHint: "思維引導：① 對於「沒有固定收入（淡季甚至零收入）」的人士，規定每月必須償還固定金額的分期付款貸款會帶來甚麼風險？哪種信貸更具還款彈性？ ➔ ② 相反，對於「有穩定月薪且購買大額資產（如汽車或婚宴）」的人士，為何不應只還循環貸款的最低還款額或刷信用卡拖欠？哪種信貸能促使預先擬定還款計劃？",
+      desc: "請為以下兩類處境截然不同的借款人提供專業信貸建議：<br>• <strong>客戶 A（自由攝影師阿朗）</strong>：阿朗是接案維生的自由攝影師，每月接到的拍攝工作數量不一，<strong>沒有固定收入</strong>（淡季月份甚至完全沒有收入）。阿朗現時突然需要一筆資金周轉，正考慮使用「銀行透支（或信貸限額）」還是「分期付款貸款」。<br>• <strong>客戶 B（準新人浩賢與未婚妻）</strong>：兩人均有穩定全職月薪。浩賢想借款 <strong>$150,000 購買一輛家庭汽車</strong>，朋友見「循環貸款」的每月最低還款額遠比分期付款貸款低，建議他借循環貸款並只還最低還款額；未婚妻則打算直接刷「信用卡」支付 $200,000 的酒店婚宴酒席，婚後再慢慢還。",
+      tableHtml: "",
+      q1: "1️⃣ 對沒有固定月薪的「客戶 A（自由攝影師阿朗）」而言，哪種消費者信貸最【不適合】他？應建議他選擇哪種？",
+      opts1: [
+        { text: "「分期付款貸款」最不適合；應建議他選擇「透支服務（或信貸限額）」，因為其還款安排較靈活，在沒收入的淡季月份只須繳付較低的每月最低還款額，避免因無法按固定期數還款而違約破產", ok: true, basicKeep: true },
+        { text: "「透支服務」最不適合；應建議他選擇「分期付款貸款」，因為分期付款貸款要求他每個月不論有無收入都必須償還固定本金和利息，有助培養自律", ok: false, basicKeep: true },
+        { text: "「信用卡」最不適合；因為自由工作者在法例上被禁止使用任何設有信用額的信貸工具", ok: false, basicKeep: false },
+        { text: "所有消費者信貸的還款安排完全相同，阿朗選擇任何一種都沒有分別", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 在「客戶 B」中，為何朋友建議借「循環貸款（只還最低還款額）」買 $150,000 汽車、以及未婚妻打算用「信用卡」付巨額婚宴酒席的想法是不可取的？",
+      opts2: [
+        { text: "因為信用卡的利率最高（循環貸款亦不設全數還款限期），若借取巨款後只還每月最低還款額，未清償的結欠餘額會不斷滾存高昂複息，極易跌入長期累積負債的陷阱", ok: true, basicKeep: true },
+        { text: "因為循環貸款與信用卡均規定借款人必須在借款後第 7 天全數清還本金，完全沒有任何還款彈性", ok: false, basicKeep: true },
+        { text: "因為酒店及車行在商業慣例上只接受顧客以現鈔付款，完全不接受信用卡或銀行轉帳", ok: false, basicKeep: false },
+        { text: "因為使用信用卡或循環貸款消費會即時令借款人的個人信貸評分跌至破產級別", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 對於有穩定月薪並需要借取大額款項購買昂貴物品（如 $150,000 汽車或支付婚宴酒席）的「客戶 B」，應建議採用哪種信貸？原因為何？",
+      opts3: [
+        { text: "應採用「分期付款貸款」；因為除利率一般較信用卡和透支低（減輕利息支出）外，更能促使借款人在借款前預先擬定還款計劃，按固定期數有系統地在合理時間內還清債務", ok: true, basicKeep: true },
+        { text: "應採用「銀行透支服務」；因為銀行透支不設還款期限且按日計算利息，最適合用作長達十年的大額資產融資", ok: false, basicKeep: true },
+        { text: "應採用「八達通借記卡」；因為八達通可提供高達 $200,000 的免息透支信用額供購買汽車", ok: false, basicKeep: false },
+        { text: "應同時申請十張不同銀行的信用卡分拆簽帳，以賺取最多迎新禮品並只繳付最低還款額", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **收入不穩定人士的信貸選擇**：分期付款貸款的壞處是**還款安排固定、欠缺靈活性**。一旦自由工作者在某月沒有收入，便會無力償還固定期款而陷入財政困難；相反，透支服務或信貸限額具有**靈活還款**的優點（只須繳付每月最低還款額），故較適合收入不穩者應急！<br>2. **購買昂貴物品的信貸選擇**：購買汽車或支付婚宴等大額開支，應選用**「分期付款貸款」**——一來利率較低，二來能**促使借款人預先擬定還款計劃**（估算每期負擔能力及還清時間），避免跌入循環貸款或信用卡只還最低還款額的累積負債陷阱！"
+    },
+    {
+      title: "信貸顧問個案 2：報讀專業進修課程的三項個人貸款計劃比較",
+      tag: "循環貸款 vs 不同金額的分期付款貸款 ｜ 按「首年還款壓力」與「未來額外資金需要」決策",
+      guideHint: "思維引導：① 若希望「首年盡量償還較少款項」，應比較哪個計劃不設固定月供、容許只繳付較低的每月最低還款額？ ➔ ② 若明年「可能需要額外資金（但現時只需 $120,000）」，試比較「一筆過借入 $180,000 分期貸款」與「批核 $180,000 循環貸款但先提取 $120,000」兩者在首年計息基礎及日後再提款手續上的分別。",
+      desc: "詠琳打算報讀一個為期兩年的海外雙學位課程，她現時需要向銀行借款 <strong>$120,000</strong> 來支付首階段學費。銀行向她提供以下三項個人貸款計劃（假設循環貸款的利率稍高於分期付款貸款）：",
+      tableHtml: `
+        <table class="stmt-table">
+          <thead><tr><th>計劃名稱</th><th>信貸類型</th><th>批核信用額／貸款額</th><th>還款期與計息方式</th></tr></thead>
+          <tbody>
+            <tr><td><strong>貸款計劃甲</strong></td><td>信貸限額（循環貸款）</td><td>信用額：$180,000</td><td>不設固定還款期，設有每月最低還款額；按實際提取結欠餘額計息</td></tr>
+            <tr><td><strong>貸款計劃乙</strong></td><td>分期付款貸款</td><td>貸款額：$120,000</td><td>為期 24 個月固定分期償還本金和利息；按貸款額 $120,000 計息</td></tr>
+            <tr><td><strong>貸款計劃丙</strong></td><td>分期付款貸款</td><td>貸款額：$180,000</td><td>為期 24 個月固定分期償還本金和利息；按貸款額 $180,000 計息</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 如果詠琳在進修首年需轉為半職工作導致收入大減，希望「來年能盡量償還較少款項」，她應選擇哪項貸款計劃？為甚麼？",
+      opts1: [
+        { text: "應選擇「貸款計劃甲（循環貸款）」；因為循環貸款不設固定分期還款安排，詠琳在來年可選擇每月只繳付金額遠低於固定月供的「每月最低還款額」，享有最大還款彈性", ok: true, basicKeep: true },
+        { text: "應選擇「貸款計劃乙（$120,000 分期付款貸款）」；因為分期付款貸款在首年完全無須償還任何本金或利息", ok: false, basicKeep: true },
+        { text: "應選擇「貸款計劃丙（$180,000 分期付款貸款）」；因為借取的貸款額越大，每月需要償還的金額便越少", ok: false, basicKeep: false },
+        { text: "三項計劃在首年需要償還的最低金額完全相同", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 如果詠琳認為她明年到海外交流時所需的總金額「可能多於 $120,000（但不確定何時需要及實際需要多少）」，她應選擇「計劃甲」還是「計劃丙」？首先從「利息成本計算基礎」分析原因：",
+      opts2: [
+        { text: "應選擇「計劃甲（循環貸款）」；因為計劃甲只按實際已提取的結欠餘額（目前僅 $120,000）計算利息；若選計劃丙，銀行便會由第一天起按全數 $180,000 貸款額收取利息，白白為尚未動用的 $60,000 付息", ok: true, basicKeep: true },
+        { text: "應選擇「計劃丙（$180,000 分期付款貸款）」；因為分期付款貸款只對已花費的金額計息，尚未動用的 $60,000 存放在銀行完全不用支付貸款利息", ok: false, basicKeep: true },
+        { text: "應選擇「計劃甲（循環貸款）」；因為循環貸款的預先批核信用額 $180,000 享有長達兩年的免息期", ok: false, basicKeep: false },
+        { text: "兩者的計息基礎完全相同，都是由批核當日起按 $180,000 全額計算利息", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 承上題，除了節省未動用資金的利息外，選擇「計劃甲（循環貸款）」比「計劃丙」還有甚麼借貸與還款上的優勢？",
+      opts3: [
+        { text: "計劃甲讓詠琳可在 $180,000 信用額內隨時提取額外款項而無須重新辦理申請手續，且償還部分欠款後可用信用額自動回復，還款安排亦較計劃丙靈活", ok: true, basicKeep: true },
+        { text: "計劃甲能強制詠琳在 24 個月內按固定金額還清所有學費貸款，避免她延遲還款", ok: false, basicKeep: true },
+        { text: "計劃甲是由政府提供的免息助學貸款，而計劃丙則是由財務公司提供的高利貸", ok: false, basicKeep: false },
+        { text: "計劃甲可讓詠琳直接用循環貸款帳戶在海外商店免匯率兌換刷卡購物", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **首年盡量償還較少款項**：分期付款貸款（乙和丙）規定每月必須償還固定的本金加利息；而**計劃甲（循環貸款）**不設固定分期還款額，詠琳來年只需繳付金額低得多的**每月最低還款額**！<br>2. **將來可能需要額外資金**：若選計劃丙（一筆過借 $\\$180,000$ 分期貸款），利息會即時按 **$\\$180,000$ 全額**計算；若選**計劃甲（$\\$180,000$ 循環貸款）**，現在只提取 $\\$120,000$ 交學費，就**只按 $\\$120,000$ 結欠餘額計息**，將來有需要時才隨時提取餘下的 $\\$60,000$ 備用額（無須重新申請），還款亦更具彈性！"
+    },
+    {
+      title: "信貸顧問個案 3：高級工程師新居添置家電——用「信用卡」還是「私人貸款」？",
+      tag: "實戰決策比較 ｜ 衡量何時選用信用卡、透支、信貸限額或分期付款貸款",
+      guideHint: "思維引導：① 若借款人收入高且穩定、有能力在下月到期還款日前全數找數，使用現有信用卡相比重新申請私人貸款，在手續、免息期及消費獎賞上有何優勢？ ➔ ② 若開支龐大需分兩年攤還，為何分期付款貸款比拖欠信用卡卡數更合適？ ➔ ③ 海外旅遊購物與追求低息靈活還款分別適合哪種信貸？",
+      desc: "家豪現年 32 歲，是一家大型建築公司的高級工程師（收入高且穩定）。他剛買入一個住宅單位並付妥首期。為給新居添置全套智能家電，他正考慮使用他的「信用卡」、申請「私人貸款（分期付款貸款）」或使用「銀行透支」。",
+      tableHtml: "",
+      q1: "1️⃣ 如果家豪決定使用他的「信用卡」而非申請「私人貸款」來支付該批家電款項，下列哪兩項是支持他使用信用卡的合理理由？",
+      opts1: [
+        { text: "① 無須另行辦理貸款申請手續（可在現有信用額內即時付款，方便快捷）；② 可享免息還款期（若在到期還款日前全數清還便無須付息）及賺取信用卡消費回贈、積分或電器商戶折扣優惠", ok: true, basicKeep: true },
+        { text: "① 信用卡的逾期結欠年利率遠低於私人分期付款貸款；② 信用卡能促使家豪在購買家電前預先擬定固定的分期還款計劃", ok: false, basicKeep: true },
+        { text: "① 信用卡沒有限制最高簽帳信用額；② 使用信用卡簽帳無須在日後向銀行償還任何本金", ok: false, basicKeep: false },
+        { text: "① 信用卡可避免家豪簽發的支票遭銀行拒付；② 信用卡按日計算的透支利息較低", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 相反，如果全屋裝修及家電開支極為龐大，家豪預計無法在下月到期還款日前全數清還，而需時兩年分期償還，為甚麼他應該改為申請「分期付款貸款」而非用信用卡拖欠卡數？",
+      opts2: [
+        { text: "因為分期付款貸款的利率一般遠比信用卡低（可大幅減少兩年內的利息總支出），而且固定還款安排能促使他有系統地在兩年內還清債務", ok: true, basicKeep: true },
+        { text: "因為分期付款貸款不設到期還款日及全數償還限期，家豪可以隨時暫停還款而不會影響信貸記錄", ok: false, basicKeep: true },
+        { text: "因為使用分期付款貸款購買家電可自動獲得電器行提供的半價現金優惠", ok: false, basicKeep: false },
+        { text: "因為信用卡一旦未能在首月全數清還，銀行便會即時沒收家豪新購置的住宅單位", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 為以下兩個日常情境配對最合適的消費者信貸：(i) 消費者在東京旅遊購物但身上沒有足夠日圓現金；(ii) 消費者想借款後享有較大還款彈性，但又不想繳付像信用卡般高昂的利息。",
+      opts3: [
+        { text: "情境 (i) 應使用「信用卡」（全球通行，無須預先兌換外幣）；情境 (ii) 應使用「信貸限額／循環貸款」（還款靈活且利率一般比信用卡及透支低）", ok: true, basicKeep: true },
+        { text: "情境 (i) 應使用「銀行透支」；情境 (ii) 應使用「分期付款貸款」", ok: false, basicKeep: true },
+        { text: "情境 (i) 應使用「信貸限額」；情境 (ii) 應使用「信用卡」", ok: false, basicKeep: false },
+        { text: "兩個情境均應使用「分期付款貸款」", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **用信用卡購物的理由**：① **方便快捷**：可在預先批核信用額內即時付款，無須像申請私人貸款般重新遞交入息證明等候批核；② **免息期與獎賞優惠**：家豪收入高且穩定，若在到期還款日前全數清還欠款便**無須支付任何利息**（私人貸款借入後即時起計息），更可賺取信用卡**積分、現金回贈或指定商戶折扣優惠**；③ **還款具彈性**。<br>2. **需長時期分期償還大額開支**：若無法在免息期內還清，便應選利率較低且促使預先擬定還款計劃的**分期付款貸款**！"
+    }
+  ];
+
+  // ==================== 工作區 3：個人信貸記錄管理（啟發式思維引導） ====================
+  let zone2Cases = [
+    {
+      title: "信貸評分個案 1：影響個人信貸記錄的五大因素與維持良好記錄的重要性",
+      tag: "個人信貸報告與信貸評分 ｜ 對放債人與借款人的作用",
+      guideHint: "思維引導：① 分辨「放債人（評估貸款申請人的信貸可靠性）」與「借款人自己（核實資料準確性及防範身份遭盜用）」查閱信貸報告的不同目的 ➔ ② 良好的信貸記錄有助在「借貸時」獲得較佳條款（貸款利率較低還是較高？信用額較高還是較低？），但會否影響定期存款利率？",
+      desc: "剛投身社會工作的畢業生曉彤，在申請第一張信用卡時，銀行主任提醒她日後必須注意維持良好的「個人信貸記錄（又稱信貸報告，當中包含信貸評分）」。",
+      tableHtml: `
+        <table class="stmt-table">
+          <thead><tr><th>影響個人信貸記錄的五大主要因素</th><th>令信貸記錄較佳的情況</th><th>令信貸記錄較差的情況</th></tr></thead>
+          <tbody>
+            <tr><td>1. 還款記錄 ｜ 2. 信貸帳戶記錄 ｜ 3. 未償還的債務 ｜ 4. 破產記錄 ｜ 5. 拖欠債務記錄</td><td>準時還款、適當使用信貸、結欠餘額較低、從未破產或拖欠</td><td>延遲還款、未償還結欠餘額高、曾申請破產或有拖欠債務記錄</td></tr>
+          </tbody>
+        </table>
+      `,
+      q1: "1️⃣ 「放債人（如銀行及財務公司）」與「借款人自己」查閱個人信貸記錄分別有甚麼主要目的？",
+      opts1: [
+        { text: "放債人：評估貸款申請人的信貸可靠性，以決定應否批核貸款及批核的貸款額；借款人：核實資料準確性、了解自身財務狀況，並確保身份沒有遭盜用（及早發現潛在信貸舞弊）", ok: true, basicKeep: true },
+        { text: "放債人：查核申請人在銀行定期存款帳戶的結餘金額；借款人：向信貸資料機構申請直接豁免償還所有逾期信用卡欠款", ok: false, basicKeep: true },
+        { text: "放債人：保證擁有良好信貸記錄的借款人在未來百分百必定能如期還款；借款人：利用信貸報告代替稅務局的薪俸稅評稅通知書", ok: false, basicKeep: false },
+        { text: "個人信貸記錄屬高度機密，只有法院破產管理署官員有權查閱，借款人自己是無權查閱的", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 借款人維持良好的個人信貸記錄，在日後申請個人信貸時可獲得甚麼好處？",
+      opts2: [
+        { text: "① 較容易獲得信貸或貸款批核；② 可獲得較佳的信貸條款，例如較低的貸款利率（降低借款成本）及較高的信用額（信貸額）", ok: true, basicKeep: true },
+        { text: "① 個人貸款利率較高；② 在銀行開立定期存款帳戶時可獲發比普通存戶更高的存款利率條款", ok: false, basicKeep: true },
+        { text: "① 信用卡逾期未還款時可永久免收利息；② 無須受任何預先批核信用額的限制", ok: false, basicKeep: false },
+        { text: "① 可獲政府減免個人薪俸稅；② 購買股票時可獲豁免交易印花稅", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 相反，如果某消費者的個人信貸記錄欠佳（例如經常拖欠還款），可能會面對甚麼後果？",
+      opts3: [
+        { text: "放債人或會提供較差的貸款條款（例如他須以較高利率借款及獲批較低信用額），甚至拒絕他的貸款申請（在最壞情況下未來一段長時間內都不能成功申請個人貸款）", ok: true, basicKeep: true },
+        { text: "他現時持有的所有信用卡及銀行儲蓄帳戶會被金管局即時強制取消並充公存款", ok: false, basicKeep: true },
+        { text: "他會被自動列為破產人士，且終身不得在香港受僱工作", ok: false, basicKeep: false },
+        { text: "他只可以使用分期付款貸款，而不能使用八達通或現金購物", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **良好信貸記錄的好處與界限**：維持良好個人信貸記錄代表拖欠債務機會較低，好處是申請貸款時**較易獲批核**，並可獲**較佳貸款條款（如較低貸款利率及較高信用額）**；但與「開立定期存款帳戶時獲取較佳條款」完全無關！<br>2. **信貸記錄欠佳的後果**：會令借款人須以較高利率借款、獲批較低信用額，甚至貸款申請被拒（但不會令他現有的所有信用卡即時被取消）！<br>3. **重要提醒**：即使借款人擁有良好的個人信貸記錄，也不代表他未來必定能如期還款！"
+    },
+    {
+      title: "信貸評分個案 2：設計師阿峰「常常用盡信用額但準時全額還款」的信貸記錄評估",
+      tag: "兩面辯證分析 ｜ 「還款記錄良好」vs「未償還債務結欠極高（用盡信用額）」",
+      guideHint: "思維引導：這是一道兩面分析題，請對照影響信貸記錄的五大因素：① 若認為他「會有良好記錄」，應扣連他在到期還款日前全數還款的表現（屬於哪項因素？）；② 若認為他「不會有良好記錄」，應扣連他常常用盡四張卡信用額的情況（導致每期截數時哪項因素處於極高水平？）；③ 思考若終身完全不借貸，會否缺乏「信貸帳戶記錄」？",
+      desc: "室內設計師阿峰擁有四張信用卡。他為了方便採購及日常消費，經常使用信用卡簽帳。雖然阿峰每個月都<strong>常常用盡四張卡的信用額（刷爆卡）</strong>，但他每次都會<strong>在到期還款日前全數償還欠款</strong>。試評估阿峰是否會有良好的個人信貸記錄。",
+      tableHtml: "",
+      q1: "1️⃣ 如果我們認為阿峰「會有良好的個人信貸記錄」，應根據影響個人信貸記錄的哪一項因素來解釋？",
+      opts1: [
+        { text: "根據「還款記錄（及拖欠債務記錄）」因素：阿峰每次都在到期還款日前全數償還欠款，擁有準時還款的良好記錄且從無拖欠債務，這會正面提升其信貸評分", ok: true, basicKeep: true },
+        { text: "根據「未償還的債務」因素：因為常常用盡四張信用卡的信用額，代表他擁有極高消費力，銀行最喜歡這類客戶", ok: false, basicKeep: true },
+        { text: "根據「破產記錄」因素：因為只要擁有四張或以上信用卡，便在法律上獲豁免破產記錄審查", ok: false, basicKeep: false },
+        { text: "因為使用信用卡購物可賺取大量積分，積分越多代表信貸評分越高", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 相反，如果我們認為阿峰「不會有良好的個人信貸記錄（或會對其信貸評分造成負面影響）」，應根據哪一項因素來解釋？",
+      opts2: [
+        { text: "根據「未償還的債務（信貸使用率）」因素：阿峰擁有四張信用卡且常常用盡信用額，導致他在每期結單截數時的未償還債務結欠餘額極高（信貸使用度過高），放債人會認為其財務過度依賴信貸、違約風險較高，令信貸記錄變差", ok: true, basicKeep: true },
+        { text: "因為阿峰每次都在到期還款日前全數清還欠款，令發卡銀行完全賺不到任何逾期利息，銀行會因此故意調低他的信貸評分", ok: false, basicKeep: true },
+        { text: "因為根據香港法例，任何市民持有超過三張信用卡即屬違法，會被信貸資料機構直接扣減信貸評分", ok: false, basicKeep: false },
+        { text: "因為在實體商店經常使用信用卡付款會磨損晶片，導致信貸帳戶記錄受損", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 有人認為：「要維持良好的個人信貸記錄，消費者應該完全避免向任何財務機構借款（終身不使用信用卡或貸款）。」這說法正確嗎？",
+      opts3: [
+        { text: "不正確！維持良好信貸記錄應透過籌劃消費、保持自律及準時還款；若完全從不申請及使用信貸，便會缺乏「信貸帳戶記錄（過往成功申請和適當使用信貸的歷史）」，反而無助建立良好信貸記錄", ok: true, basicKeep: true },
+        { text: "正確！只要一輩子不申請信用卡及不向銀行借錢，在信貸報告系統中的信貸評分就必定是全港最高的滿分級別", ok: false, basicKeep: true },
+        { text: "不正確！要維持良好信貸記錄，消費者應該只使用信貸限額消費，而絕對不使用信用卡", ok: false, basicKeep: false },
+        { text: "正確！因為任何向銀行借貸的行為都會被視作拖欠債務記錄", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **兩面辯證高分拆解**：本類開放式題目可答「會」或「不會」，關鍵在於扣連影響個人信貸記錄的正確因素：<br>• 若答**「會有良好信貸記錄」**：因為阿峰每次都在到期還款日前全數償還欠款，沒有任何拖欠債務記錄，**還款記錄良好**。<br>• 若答**「不會有良好信貸記錄」**：因為阿峰常常用盡四張信用卡的信用額，反映其**未償還的債務金額（結欠餘額／信貸使用率）經常處於極高水平**，會令其個人信貸記錄變差！<br>2. **無須完全避免借款**：維持良好信貸記錄應籌劃消費、保持自律及準時還款，但**無須完全避免向財務機構借款**（適當地申請及使用信貸並準時還款，反而能建立良好的「信貸帳戶記錄」）！"
+    },
+    {
+      title: "信貸評分個案 3：美琪「為迎新禮品狂申卡＋只還最低還款額」遭拒批原因分析",
+      tag: "綜合診斷分析 ｜ 剖析申請信用卡被拒原因與維持良好信貸記錄的六大方法",
+      guideHint: "思維引導：① 思考長期只還最低還款額在複息滾存下，長遠會增加還是減少可用作花費的金錢？ ➔ ② 檢視美琪的兩個行為（「只還最低還款額累積高結欠」與「兩星期內突然申請四張新卡」）如何影響放債人對其財務狀況的評估 ➔ ③ 針對這兩大問題提出改善信貸記錄的具體建議。",
+      desc: "美琪經常申請信用卡以換取迎新行李箱及現金券。她過往每年申請一張信用卡，<strong>上個月更在短短兩星期內突然申請了四張新信用卡</strong>。美琪喜歡以信用卡購物，每收到月結單後都<strong>只會償還每月最低還款額</strong>，她認為「這樣做可讓自己每月保留更多金錢花費」。最近美琪再申請另一張信用卡，但<strong>申請遭銀行拒絕</strong>。",
+      tableHtml: "",
+      q1: "1️⃣ 美琪認為「只償還信用卡的每月最低還款額，便可讓自己有更多金錢花費」。你同意這種想法嗎？為甚麼？",
+      opts1: [
+        { text: "不同意！雖然短期內當月流出的現金較少，但信用卡會就未清償的結欠餘額收取極高昂的利息；長期只還最低還款額會令債務及複息迅速累積，長遠須支付龐大利息開支，反而令未來可支配及花費的金錢大幅減少", ok: true, basicKeep: true },
+        { text: "同意！因為只要繳付了每月最低還款額，餘下的結欠金額便享有永久免息期，美琪可以將省下的現金用作其他投資或消費", ok: false, basicKeep: true },
+        { text: "不同意！因為當持卡人只繳付每月最低還款額時，發卡銀行會在翌日即時取消該信用卡帳戶", ok: false, basicKeep: false },
+        { text: "同意！因為信用卡不設全數償還貸款的限期，美琪一輩子都無須償還本金", ok: false, basicKeep: false }
+      ],
+      q2: "2️⃣ 下列哪兩項是導致美琪最近申請新信用卡時「遭銀行拒絕」的最可能原因？",
+      opts2: [
+        { text: "① 她長期只償還每月最低還款額，導致累積了龐大的「未償還債務（結欠餘額極高）」；② 她上個月「突然增加申請信用卡的數目（兩星期內申請四張）」，令放債人懷疑她是否陷入財政困難，導致信貸記錄及評分變差", ok: true, basicKeep: true },
+        { text: "① 她經常在提供信用卡折扣優惠的商店和食肆消費；② 她從未向銀行申請過分期付款貸款或銀行透支服務", ok: false, basicKeep: true },
+        { text: "① 她每次都在到期還款日前繳付了每月最低還款額；② 她拿走了銀行太多迎新行李箱令銀行虧蝕推廣費", ok: false, basicKeep: false },
+        { text: "① 她的年齡尚未滿 60 歲；② 她沒有提供住宅物業作為申請普通信用卡的抵押品", ok: false, basicKeep: false }
+      ],
+      q3: "3️⃣ 我們應向美琪建議甚麼具體方法，以改善其個人信貸記錄並增加日後成功申請信貸的機會？",
+      opts3: [
+        { text: "盡快清還現有信用卡的未償還結欠餘額（在到期還款日前全數還款）、避免在短時間內突然增加申請信用卡的數目，並籌劃消費及定期檢討消費習慣（保持自律，只購買有能力負擔的物品）", ok: true, basicKeep: true },
+        { text: "立即向另外八家財務公司同時遞交循環貸款申請，以證明自己對信貸產品有強烈需求", ok: false, basicKeep: true },
+        { text: "將現有信用卡的每月最低還款額改為每半年才繳付一次，以保留更多手頭現金", ok: false, basicKeep: false },
+        { text: "向破產管理署申請個人自願破產，以便將過往的信貸記錄一筆勾銷重新開始", ok: false, basicKeep: false }
+      ],
+      exp: "【核心概念拆解】<br>1. **只還最低還款額的謬誤**：未清還的結欠餘額會被收取**高昂利息（複息滾存）**，令債務迅速累積，長遠實際償還的本息總額遠高於原欠款，最終可用作花費的金錢反而更少！<br>2. **遭銀行拒批的兩大原因**：① 長期只還最低還款額令**未償還債務（結欠餘額）高企**，削弱還款能力及信貸評分；② 短時間內**突然增加申請信用卡的數目**，會令放債人懷疑申請人是否陷入財政困難！<br>3. **維持良好信貸記錄的六大方法**：① 籌劃消費、② 定期檢討消費習慣、③ 使用信貸時保持自律、④ 避免突然增加申請信用卡的數目、⑤ 申請貸款時考慮自身還款能力、⑥ 準時還款！"
+    }
+  ];
+
+  // ==================== 工作區 4：捉錯與消去雙擂台（啟發式審題引導，不直接劇透哪句錯） ====================
+  let mod4Sub = 0;
+
+  const redPenCases = [
+    {
+      title: "紅筆捉錯挑戰 1：找出答卷中對「消費者信貸性質與信用卡計息」的錯句",
+      q: "議題：說明「消費者信貸」的基本性質，以及信用卡在還款與計息方面的規定。",
+      guideHint: "審題切入點：請檢視以下三句中關於「消費者信貸的抵押要求與期限」、「只繳付信用卡每月最低還款額是否免息／按甚麼金額計息」以及「網上與流動支付風險」的描述，找出有誤的一句。",
+      chips: [
+        {
+          text: "消費者信貸是供個人購買消費品和服務的信貸，通常是無抵押的，只適合用作提供短期流動資金，不應視為長期或固定的個人融資方式。",
+          easyText: "消費者信貸通常是無抵押的，只適合提供短期流動資金，不應視為長期個人融資方式。",
+          isFlaw: false
+        },
+        {
+          text: "信用卡不設全數償還貸款的限期，也沒有規定分期還款的次數；只要持卡人在到期還款日前繳付每月最低還款額，便無須繳付任何利息（或只按預先批核的信用額計算利息）。",
+          easyText: "只要持卡人在到期還款日前繳付每月最低還款額，便無須繳付任何利息（或只按信用額計息）。",
+          isFlaw: true
+        },
+        {
+          text: "除了在實體商店出示信用卡外，持卡人亦可透過互聯網或流動支付平台（如採用信用支付系統的 Visa payWave）先消費後還款，但若不慎在網上洩露信用卡資料便可能蒙受損失。",
+          easyText: "持卡人可透過互聯網或信用支付系統先消費後還款，但若洩露信用卡資料可能蒙受損失。",
+          isFlaw: false
+        }
+      ],
+      exp: "<strong>• 失分原因</strong>：<br>1. **以為只要繳付每月最低還款額便不用付息是完全錯誤的**！只要在到期還款日後仍有未清還的結欠餘額，便須繳付高昂利息！<br>2. 信用卡是按未清償的**「結欠餘額」**收取利息，而非按預先批核的「信用額」計息！"
+    },
+    {
+      title: "紅筆捉錯挑戰 2：找出答卷中對「透支服務、信貸限額與分期付款貸款」比較的錯句",
+      q: "議題：比較「銀行透支」、「信貸限額（循環貸款）」及「分期付款貸款」三者的運作特徵。",
+      guideHint: "審題切入點：請思考三個問題：① 哪一種信貸才稱為「循環貸款」？② 分期付款貸款有沒有設每月最低還款額及高還款靈活性？③ 哪一種消費者信貸的利率一般較低？",
+      chips: [
+        {
+          text: "銀行透支經常配合往來帳戶使用，有助帳戶持有人避免簽發的支票遭銀行拒付（減省拒付手續費或罰款），並就透支金額每日計算利息。",
+          easyText: "銀行透支配合往來帳戶使用，有助避免支票遭拒付，並就透支金額每日計算利息。",
+          isFlaw: false
+        },
+        {
+          text: "信貸限額（又稱循環貸款）讓借款人可在預先批核的信用額內隨時借款和還款，當借款人償還欠款後，其可用的信用額便會自動回復。",
+          easyText: "信貸限額（循環貸款）讓借款人在信用額內隨時借還，還款後可用信用額自動回復。",
+          isFlaw: false
+        },
+        {
+          text: "分期付款貸款又稱為循環貸款，設有每月最低還款額及極高的還款靈活性，而銀行透支服務的利率則在所有消費者信貸中最低。",
+          easyText: "分期付款貸款又稱循環貸款，設最低還款額且極具靈活性，而銀行透支的利率最低。",
+          isFlaw: true
+        }
+      ],
+      exp: "<strong>• 失分原因</strong>：<br>1. 「循環貸款」是指**信貸限額**，而非分期付款貸款！<br>2. 分期付款貸款設有固定的還款次數與固定還款安排，**不設每月最低還款額**，且壞處是**還款安排欠缺靈活性**！<br>3. 在常見消費者信貸中，**分期付款貸款（及信貸限額）的利率一般較低**，而信用卡和銀行透支的利率則較高！"
+    },
+    {
+      title: "紅筆捉錯挑戰 3：找出答卷中對「個人信貸記錄影響因素與維持方法」的錯句",
+      q: "議題：說明影響個人信貸記錄的因素，以及維持良好個人信貸記錄的重要性與方法。",
+      guideHint: "審題切入點：請檢視以下三個概念：① 良好信貸記錄是否保證未來百分百如期還款；② 結欠餘額高低與還款記錄的影響；③ 短時間內突然申請多張信用卡會改善還是損害信貸記錄？",
+      chips: [
+        {
+          text: "個人信貸記錄包含個人在信貸和還款方面的詳細記錄（包括曾否申請破產及信貸評分）；即使借款人擁有良好的信貸記錄，也不代表他未來必定能如期還款。",
+          easyText: "信貸記錄包含還款、破產記錄及信貸評分；良好記錄不代表未來必定能如期還款。",
+          isFlaw: false
+        },
+        {
+          text: "如果借款人的未償還債務結欠餘額較低、過往有準時還款記錄且沒有拖欠債務記錄，其個人信貸記錄便會較佳。",
+          easyText: "若未償還債務結欠餘額較低、有準時還款記錄且無拖欠記錄，信貸記錄便較佳。",
+          isFlaw: false
+        },
+        {
+          text: "為了維持良好的個人信貸記錄並向銀行證明自己的信貸需求，消費者應該在短時間內突然增加申請多張信用卡，並在開立定期存款時憑良好信貸記錄獲取更高存款利息。",
+          easyText: "為維持良好信貸記錄，應在短時間內突然申請多張信用卡，並憑此獲取更高定期存款利息。",
+          isFlaw: true
+        }
+      ],
+      exp: "<strong>• 失分原因</strong>：<br>1. 消費者應**「避免突然增加申請信用卡的數目」**，因為突然申請多張信用卡會令放債人懷疑申請人是否陷入財政困難，反而損害信貸記錄！<br>2. 良好個人信貸記錄有助在**借貸時**獲批較低貸款利率及較高信用額，但與**開立定期存款帳戶**的條款無關！"
+    }
+  ];
+
+  let elimMCs = [
+    {
+      title: "消去法實戰 1：使用「銀行透支服務」的特點與壞處",
+      stem: "下列哪項有關香港「銀行透支服務」的陳述是正確的？",
+      rawStmts: [
+        { text: "銀行透支服務通常毋須提供抵押品，也沒有固定的全數還款期，但利率一般比信貸限額和分期付款貸款高。", hint: "思考方向：銀行透支是否需要抵押品？有沒有固定還款期？其利率與私人貸款相比誰高誰低？", isTrue: true, exp: "正確！銀行透支屬無抵押消費者信貸，不設全數清還限期，但利率高於私人貸款。" },
+        { text: "銀行透支服務設有固定的分期還款安排，且透支利息通常是按月並根據預先批核的信用額計算。", hint: "思考方向：透支服務是否設固定分期還款？透支利息是按月還是按日、按信用額還是按實際透支額計算？", isTrue: false, exp: "錯誤！透支服務還款靈活（不設固定分期還款安排），且利息是按「實際透支金額」【每日】計算！" },
+        { text: "如果借款人的銀行往來帳戶內沒有任何存款（餘額為零），便不能使用已獲批核的透支服務。", hint: "思考方向：透支服務的定義是甚麼？當往來帳戶餘額為零時，能否在預先批核的透支額度內提款？", isTrue: false, exp: "錯誤！透支服務正是讓帳戶持有人在存款不足（甚至餘額為零）時，在預先批核信用額內提取超出存款額的金錢！" }
+      ]
+    },
+    {
+      title: "消去法實戰 2：分期付款貸款與信貸限額（循環貸款）的分別",
+      stem: "下列哪些有關「分期付款貸款」與「信貸限額（循環貸款）」的陳述是正確的？",
+      rawStmts: [
+        { text: "分期付款貸款可促使借款人在借款前預先擬定還款計劃，但信貸限額則不能（若使用不當可能成為累積負債的陷阱）。", hint: "思考方向：哪一種貸款設有固定還款期數與金額，從而促使借款人預先計劃如何還款？", isTrue: true, exp: "正確！固定分期安排促使借款人預先估算每期負擔能力及還清時間。" },
+        { text: "信貸限額設有每月最低還款額，且一經批核，消費者每次須要在信用額內借款時便無須再次辦理申請手續；但分期付款貸款則沒有每月最低還款額。", hint: "思考方向：比較兩者在「是否設每月最低還款額」及「可否在信用額內循環再借」上的差異。", isTrue: true, exp: "正確！信貸限額可循環提取使用並設最低還款額；分期付款貸款則按固定金額還本息。" },
+        { text: "分期付款貸款的利息是按「結欠餘額」計算，而信貸限額的利息則是按預先批核的「信用額」計算。", hint: "思考方向：請核對兩者的計息基礎——分期付款貸款與信貸限額分別是按甚麼金額計算利息？", isTrue: false, exp: "錯誤！剛好顛倒：分期付款貸款按「貸款額」計息，信貸限額才按「結欠餘額」計息！" }
+      ]
+    },
+    {
+      title: "消去法實戰 3：個人信貸記錄的內容、用途與維持好處",
+      stem: "下列哪些有關「個人信貸記錄」的陳述是正確的？",
+      rawStmts: [
+        { text: "個人信貸記錄包含個人在信貸和還款方面的詳細記錄，並會顯示借款人過往曾否申請破產以及其信貸評分。", hint: "思考方向：回想個人信貸報告的內容，是否包含還款記錄、破產記錄及信貸評分？", isTrue: true, exp: "正確！這些均為個人信貸報告的核心內容。" },
+        { text: "放債人會使用個人信貸記錄來評估貸款申請人的信貸可靠性；而借款人自己亦可查閱信貸記錄以確保身份沒有遭盜用。", hint: "思考方向：核對放債人與借款人自己查閱個人信貸記錄的主要目的。", isTrue: true, exp: "正確！放債人用以審批信貸，借款人則用以核實資料及防範信貸舞弊。" },
+        { text: "維持良好個人信貸記錄的借款人，在申請個人貸款或信用卡時較易獲得批核，並可獲提供較低的貸款利率及較高的信貸額（信用額）。", hint: "思考方向：當放債人認為申請人的違約風險較低時，會提供怎樣的貸款利率與信用額？", isTrue: true, exp: "正確！這是維持良好個人信貸記錄的兩大核心好處。" }
+      ]
+    },
+    {
+      title: "消去法實戰 4：信用卡的特點、好處與限制",
+      stem: "下列哪些有關香港「信用卡」的陳述是正確的？",
+      rawStmts: [
+        { text: "信用卡設有預先批核的信用限額、到期還款日（繳款期限）及每月最低還款額；持卡人可以本地發行的信用卡於海外或海外網店購物。", hint: "思考方向：核對信用卡的基本條款（信用額、到期還款日、最低還款額）及跨境通用性。", isTrue: true, exp: "正確！全球通行及先消費後付款是信用卡的核心特點。" },
+        { text: "持卡人如在到期還款日或以前全數清付結單的總結欠，便無須支付任何利息；即使暫時沒有足夠金錢而沒有全數償還欠款（已付最低還款額），仍可繼續使用信用卡。", hint: "思考方向：在免息期內全數找數是否免息？若只還最低還款額，信用卡能否繼續使用？", isTrue: true, exp: "正確！免息期內全數清還免息；只還最低還款額雖會被收高息，但仍可繼續用卡。" },
+        { text: "信用卡只能由持牌銀行和財務公司發行，且持卡人可以較私人分期貸款為低的息率支付逾期的信用卡結欠。", hint: "思考方向：其他商業組織能否發行信用卡？信用卡的逾期息率與私人分期貸款相比誰高誰低？", isTrue: false, exp: "錯誤！信用卡可由銀行或其他商業組織發行；且逾期信用卡結欠的息率遠【高於】私人貸款！" }
+      ]
+    }
+  ];
+
+  const allComboDefs = [
+    { order: 1, reqTrue: [1], reqFalse: [2, 3], text: "只有 (1)" },
+    { order: 2, reqTrue: [2], reqFalse: [1, 3], text: "只有 (2)" },
+    { order: 3, reqTrue: [3], reqFalse: [1, 2], text: "只有 (3)" },
+    { order: 4, reqTrue: [1, 2], reqFalse: [3], text: "只有 (1) 及 (2)" },
+    { order: 5, reqTrue: [1, 3], reqFalse: [2], text: "只有 (1) 及 (3)" },
+    { order: 6, reqTrue: [2, 3], reqFalse: [1], text: "只有 (2) 及 (3)" },
+    { order: 7, reqTrue: [1, 2, 3], reqFalse: [], text: "(1)、(2) 及 (3)" }
+  ];
+
+  function prepareDynamicMC(mcItem) {
+    const shuffled = shuffle(mcItem.rawStmts);
+    mcItem.stmts = shuffled.map((s, idx) => ({
+      id: idx + 1,
+      text: `(${idx + 1}) ${s.text}`,
+      hint: s.hint,
+      isTrue: s.isTrue,
+      exp: s.exp
+    }));
+    const trueIds = mcItem.stmts.filter(s => s.isTrue).map(s => s.id);
+    const correctCombo = allComboDefs.find(c =>
+      c.reqTrue.length === trueIds.length && c.reqTrue.every(id => trueIds.includes(id))
+    );
+    const wrongPool = shuffle(allComboDefs.filter(c => c !== correctCombo)).slice(0, 3);
+    const chosenCombos = [correctCombo, ...wrongPool].sort((a, b) => a.order - b.order);
+    const letters = ["A", "B", "C", "D"];
+    mcItem.options = chosenCombos.map((c, idx) => ({
+      label: `${letters[idx]}. ${c.text}`,
+      reqTrue: c.reqTrue,
+      reqFalse: c.reqFalse
+    }));
+    mcItem.ansIdx = chosenCombos.indexOf(correctCombo);
+  }
+
+  // ==================== 狀態管理與渲染 ====================
+  let curZone = 0;
+  let subIdx = [0, 0, 0, 0];
+  let stepPicks = [null, null, null];
+  let elimState = { 1: null, 2: null, 3: null };
+  let doneMap = {};
+  let tuScore = 800;
+  let combo = 0;
+  let isZoom = false;
+
+  function randomizeAll() {
+    [zone0Cases, zone1Cases, zone2Cases].forEach(list => {
+      list.forEach(item => {
+        item.opts1 = shuffle(item.opts1);
+        item.opts2 = shuffle(item.opts2);
+        item.opts3 = shuffle(item.opts3);
+      });
+    });
+    redPenCases.forEach(c => { c.chips = shuffle(c.chips); });
+    elimMCs = shuffle(elimMCs);
+    elimMCs.forEach(m => prepareDynamicMC(m));
+  }
+
+  function reshuffleAll() {
+    randomizeAll();
+    stepPicks = [null, null, null];
+    elimState = { 1: null, 2: null, 3: null };
+    renderStage();
+  }
+
+  function toggleZoom() {
+    isZoom = !isZoom;
+    document.documentElement.style.setProperty('--scale', isZoom ? '1.16' : '1');
+    document.getElementById("zoomBtn").innerText = isZoom ? "🔍 大字體：開" : "🔍 大字體：關";
+  }
+
+  function updateTuDisplay() {
+    let grade = "A 級";
+    if (tuScore >= 900) grade = "A+ 級 (極佳)";
+    else if (tuScore >= 850) grade = "A 級 (優良)";
+    else if (tuScore < 780) grade = "B 級 (尚可)";
+    document.getElementById("tuScoreBadge").innerText = `📊 信貸評分：${grade} (${tuScore} 分)`;
+    document.getElementById("comboBadge").innerText = `🔥 連擊：${combo}`;
+  }
+
+  function addCreditScore(pts, key) {
+    combo++;
+    if (!doneMap[key]) {
+      doneMap[key] = true;
+      tuScore = Math.min(999, tuScore + pts);
+    }
+    updateTuDisplay();
+  }
+
+  function breakCombo() {
+    combo = 0;
+    updateTuDisplay();
+    const st = document.getElementById("mainStage");
+    st.classList.remove("shake");
+    void st.offsetWidth;
+    st.classList.add("shake");
+  }
+
+  function switchZone(z) {
+    curZone = z;
+    for (let i = 0; i < 4; i++) {
+      document.getElementById(`zTab${i}`).className = "z-tab" + (i === z ? " active" : "");
+    }
+    stepPicks = [null, null, null];
+    elimState = { 1: null, 2: null, 3: null };
+    renderStage();
+  }
+
+  function goSub(idx) {
+    subIdx[curZone] = idx;
+    stepPicks = [null, null, null];
+    elimState = { 1: null, 2: null, 3: null };
+    renderStage();
+  }
+
+  function getZoneList(z) {
+    if (z === 0) return zone0Cases;
+    if (z === 1) return zone1Cases;
+    return zone2Cases;
+  }
+
+  function moveSub(delta, maxLen) {
+    let next = subIdx[curZone] + delta;
+    if (next >= 0 && next < maxLen) {
+      goSub(next);
+    } else if (delta > 0 && curZone < 3) {
+      switchZone(curZone + 1);
+    }
+  }
+
+  function buildDots(total, customPrefix) {
+    const prefix = customPrefix || `${curZone}`;
+    let html = "";
+    for (let i = 0; i < total; i++) {
+      const k = `${prefix}_${i}`;
+      const cls = (i === subIdx[curZone]) ? "dot-btn active" : (doneMap[k] ? "dot-btn done" : "dot-btn");
+      html += `<button class="${cls}" onclick="goSub(${i})">${i + 1}</button>`;
+    }
+    return html;
+  }
+
+  function renderStage() {
+    const stage = document.getElementById("mainStage");
+    stage.classList.remove("fade-in");
+    void stage.offsetWidth;
+    stage.classList.add("fade-in");
+
+    if (curZone < 3) renderThreeStepZone(stage);
+    else renderArenaZone(stage);
+  }
+
+  // ==================== 渲染工作區 1–3（三步對稱決策卡） ====================
+  function renderThreeStepZone(stage) {
+    const list = getZoneList(curZone);
+    const idx = subIdx[curZone];
+    const item = list[idx];
+
+    const scaffoldHtml = isBasicMode ? `
+      <div class="scaffold-banner">
+        <span class="scaffold-tag">🌱 導學思維引導</span>
+        ${item.guideHint}<br>
+        ✨ <strong>導學支援</strong>：每步已縮小範圍至 2 個核心對比選項，點選後會<strong>即時回饋該步分析是否正確</strong>！
+      </div>
+    ` : '';
+
+    const buildStepCol = (qTitle, optsArr, sIdx) => {
+      const visibleOpts = isBasicMode ? optsArr.filter(o => o.basicKeep) : optsArr;
+      const btns = visibleOpts.map((o) => {
+        const origIdx = optsArr.indexOf(o);
+        const isPicked = (stepPicks[sIdx] === origIdx);
+        let btnCls = "step-btn";
+        if (isPicked) {
+          btnCls += isBasicMode ? (o.ok ? " picked-ok" : " picked-err") : " picked";
+        }
+        let statusSuffix = "";
+        if (isBasicMode && isPicked) {
+          statusSuffix = o.ok ? " ✅" : " ❌";
+        }
+        return `<button class="${btnCls}" onclick="pickStep(${sIdx}, ${origIdx})">👉 ${o.text}${statusSuffix}</button>`;
+      }).join("");
+      return `
+        <div class="step-col">
+          <div class="step-q">${qTitle}</div>
+          <div class="step-opts">${btns}</div>
+        </div>
+      `;
+    };
+
+    stage.innerHTML = `
+      <div>
+        <div class="stage-header">
+          <div class="sh-title">${item.title} ${getModeBadgeHtml()}</div>
+          <div class="dots-bar">
+            <button class="helper-btn" onclick="autoSolveThreeStep()">💡 示範三步滿分分析</button>
+            ${buildDots(list.length)}
+          </div>
+        </div>
+
+        ${scaffoldHtml}
+
+        <div class="statement-card">
+          <span class="sc-tag">📌 ${item.tag}</span>
+          <div class="sc-desc">${item.desc}</div>
+        </div>
+
+        ${item.tableHtml ? `<div class="mini-table-wrap">${item.tableHtml}</div>` : ''}
+
+        <div class="steps-grid">
+          ${buildStepCol(item.q1, item.opts1, 0)}
+          ${buildStepCol(item.q2, item.opts2, 1)}
+          ${buildStepCol(item.q3, item.opts3, 2)}
+        </div>
+
+        <div class="feedback-box" id="zoneFb"></div>
+      </div>
+
+      <div class="footer-bar">
+        <button class="f-nav-btn" onclick="moveSub(-1, ${list.length})" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一個案</button>
+        <button class="f-nav-btn f-primary" onclick="moveSub(1, ${list.length})">
+          ${idx === list.length - 1 ? '進入下一信貸工作區 →' : '下一個案 →'}
+        </button>
+      </div>
+    `;
+
+    if (stepPicks[0] !== null && stepPicks[1] !== null && stepPicks[2] !== null) {
+      const fb = document.getElementById("zoneFb");
+      fb.style.display = "block";
+      const ok0 = item.opts1[stepPicks[0]].ok;
+      const ok1 = item.opts2[stepPicks[1]].ok;
+      const ok2 = item.opts3[stepPicks[2]].ok;
+
+      if (ok0 && ok1 && ok2) {
+        addCreditScore(15, `${curZone}_${idx}`);
+        fb.className = "feedback-box fb-ok";
+        fb.innerHTML = `🏆 <strong>三步信貸分析全數正確！（模擬信貸評分 +15 分）</strong><br>${item.exp}`;
+      } else {
+        breakCombo();
+        fb.className = "feedback-box fb-err";
+        fb.innerHTML = `⚠️ <strong>部分步驟分析有誤：</strong> 第 1 步 [${ok0 ? '✓' : '✗'}] ｜ 第 2 步 [${ok1 ? '✓' : '✗'}] ｜ 第 3 步 [${ok2 ? '✓' : '✗'}]<br>${item.exp}`;
+      }
+    }
+  }
+
+  function pickStep(sIdx, oIdx) {
+    stepPicks[sIdx] = oIdx;
+    renderThreeStepZone(document.getElementById("mainStage"));
+  }
+
+  function autoSolveThreeStep() {
+    const item = getZoneList(curZone)[subIdx[curZone]];
+    stepPicks[0] = item.opts1.findIndex(o => o.ok);
+    stepPicks[1] = item.opts2.findIndex(o => o.ok);
+    stepPicks[2] = item.opts3.findIndex(o => o.ok);
+    renderThreeStepZone(document.getElementById("mainStage"));
+  }
+
+  // ==================== 渲染工作區 4：捉錯與消去雙擂台 ====================
+  function switchMod4Sub(s) {
+    mod4Sub = s;
+    subIdx[3] = 0;
+    elimState = { 1: null, 2: null, 3: null };
+    renderArenaZone(document.getElementById("mainStage"));
+  }
+
+  function renderArenaZone(stage) {
+    const idx = subIdx[3];
+    const topSwitch = `
+      <div class="sub-mode-bar">
+        <button class="sub-mode-btn ${mod4Sub === 0 ? 'active' : ''}" onclick="switchMod4Sub(0)">🖍️ 挑戰 A：紅筆捉錯（點擊答卷錯句）</button>
+        <button class="sub-mode-btn ${mod4Sub === 1 ? 'active' : ''}" onclick="switchMod4Sub(1)">🏆 挑戰 B：組合選擇題消去法神器</button>
+      </div>
+    `;
+
+    if (mod4Sub === 0) {
+      const item = redPenCases[idx];
+      const nums = ["①", "②", "③"];
+
+      const scaffoldHtml = isBasicMode ? `
+        <div class="scaffold-banner">
+          <span class="scaffold-tag">🌱 導學審題切入點</span>
+          ${item.guideHint}（已為你精簡句子字數，方便檢視邏輯）
+        </div>
+      ` : '';
+
+      const chipsHtml = item.chips.map((ch, cIdx) => {
+        const displayTxt = isBasicMode ? ch.easyText : ch.text;
+        return `
+          <div class="sentence-chip" id="rpChip_${cIdx}" onclick="checkRedPen(${cIdx})">
+            <span>${nums[cIdx]} ${displayTxt}</span>
+            <span style="font-size:calc(13px * var(--scale)); color:var(--rose); font-weight:900; white-space:nowrap;">🖍️ 點此捉錯</span>
+          </div>
+        `;
+      }).join("");
+
+      stage.innerHTML = `
+        <div>
+          ${topSwitch}
+          <div class="stage-header">
+            <span class="sh-title">🖍️ ${item.title} ${getModeBadgeHtml()}</span>
+            <div class="dots-bar">${buildDots(redPenCases.length, "3_rp")}</div>
+          </div>
+          ${scaffoldHtml}
+          <div class="statement-card"><div class="sc-desc">${item.q}</div></div>
+          <div class="paper-sheet">
+            <div style="font-weight:900; color:var(--rose); margin-bottom:10px; font-size:calc(14px * var(--scale));">
+              🖍️ 句子次序已隨機洗牌，請點擊藏有嚴重消費者信貸概念錯誤的那一句：
+            </div>
+            <div class="sentence-chips-wrap">${chipsHtml}</div>
+          </div>
+          <div class="feedback-box" id="rpFb"></div>
+        </div>
+        <div class="footer-bar">
+          <button class="f-nav-btn" onclick="moveSub(-1, ${redPenCases.length})" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一題</button>
+          <button class="f-nav-btn f-primary" onclick="${idx === redPenCases.length - 1 ? 'switchMod4Sub(1)' : `moveSub(1, ${redPenCases.length})`}">
+            ${idx === redPenCases.length - 1 ? '進入「挑戰 B：選擇題消去法」 →' : '下一題 →'}
+          </button>
+        </div>
+      `;
+    } else {
+      const item = elimMCs[idx];
+      const stmtsHtml = item.stmts.map(st => {
+        const curVal = elimState[st.id];
+        return `
+          <div class="elim-stmt-row">
+            <div class="elim-stmt-text">
+              ${st.text}
+              ${isBasicMode ? `<span class="elim-stmt-hint">🤔 ${st.hint}</span>` : ''}
+            </div>
+            <div class="elim-toggles">
+              <button class="elim-btn ${curVal === true ? 't-true' : ''}" onclick="toggleElim(${st.id}, true)">⭕ 正確</button>
+              <button class="elim-btn ${curVal === false ? 't-false' : ''}" onclick="toggleElim(${st.id}, false)">❌ 錯誤</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      const optsHtml = item.options.map((opt, oIdx) => {
+        let isElim = false;
+        [1, 2, 3].forEach(sId => {
+          if (elimState[sId] === true && opt.reqFalse.includes(sId)) isElim = true;
+          if (elimState[sId] === false && opt.reqTrue.includes(sId)) isElim = true;
+        });
+        return `<button class="mc-card-btn ${isElim ? 'eliminated' : ''}" onclick="checkElimMc(${oIdx})">${opt.label}</button>`;
+      }).join("");
+
+      stage.innerHTML = `
+        <div>
+          ${topSwitch}
+          <div class="stage-header">
+            <span class="sh-title">🏆 ${item.title} ${getModeBadgeHtml()}</span>
+            <div class="dots-bar">${buildDots(elimMCs.length, "3_mc")}</div>
+          </div>
+          <div class="statement-card"><div class="sc-desc">${item.stem}</div></div>
+          <p style="font-size:calc(14px * var(--scale)); font-weight:800; color:var(--violet); margin-bottom:8px;">
+            💡 消去法步驟：請先在右方逐句標記「⭕ 正確」或「❌ 錯誤」，下方矛盾的選項便會自動劃走！
+          </p>
+          <div>${stmtsHtml}</div>
+          <div class="mc-options-row">${optsHtml}</div>
+          <div class="feedback-box" id="elimFb"></div>
+        </div>
+        <div class="footer-bar">
+          <button class="f-nav-btn" onclick="moveSub(-1, ${elimMCs.length})" ${idx === 0 ? 'style="visibility:hidden"' : ''}>← 上一題</button>
+          <button class="f-nav-btn f-primary" onclick="moveSub(1, ${elimMCs.length})" ${idx === elimMCs.length - 1 ? 'style="visibility:hidden"' : ''}>下一題 →</button>
+        </div>
+      `;
+    }
+  }
+
+  function checkRedPen(cIdx) {
+    const idx = subIdx[3];
+    const item = redPenCases[idx];
+    const ch = item.chips[cIdx];
+    const nums = ["①", "②", "③"];
+    const el = document.getElementById(`rpChip_${cIdx}`);
+    const fb = document.getElementById("rpFb");
+    fb.style.display = "block";
+    if (ch.isFlaw) {
+      el.className = "sentence-chip flaw-found";
+      addCreditScore(15, `3_rp_${idx}`);
+      fb.className = "feedback-box fb-ok";
+      fb.innerHTML = `<strong>🖍️ 紅筆精準捉錯（第 ${nums[cIdx]} 句得 0 分）！</strong><br>${item.exp}`;
+    } else {
+      el.className = "sentence-chip good-clicked";
+      breakCombo();
+      fb.className = "feedback-box fb-err";
+      fb.innerHTML = `⭕ <strong>第 ${nums[cIdx]} 句是完全正確的陳述！</strong> 請再檢查其餘句子找出真正的信貸概念陷阱！`;
+    }
+  }
+
+  function toggleElim(sId, val) {
+    elimState[sId] = (elimState[sId] === val) ? null : val;
+    renderArenaZone(document.getElementById("mainStage"));
+  }
+
+  function checkElimMc(oIdx) {
+    const idx = subIdx[3];
+    const item = elimMCs[idx];
+    const fb = document.getElementById("elimFb");
+    fb.style.display = "block";
+    if (oIdx === item.ansIdx) {
+      addCreditScore(15, `3_mc_${idx}`);
+      const breakdown = item.stmts.map(s => `• <strong>陳述 (${s.id}) ${s.isTrue ? '⭕ 正確' : '❌ 錯誤'}</strong>：${s.exp}`).join("<br>");
+      fb.className = "feedback-box fb-ok";
+      fb.innerHTML = `<strong>🏆 答對了！標準答案：${item.options[item.ansIdx].label}</strong><br>${breakdown}`;
+    } else {
+      breakCombo();
+      fb.className = "feedback-box fb-err";
+      fb.innerHTML = "❌ <strong>選項不正確！</strong> 試試先在上方逐句判斷 (1)、(2)、(3) 的對錯，利用消去法鎖定答案！";
+    }
+  }
+
+  // 啟動應用程式
+  randomizeAll();
+  renderSimArea();
+  renderStage();
+</script>
+</body>
+</html>
